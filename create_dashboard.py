@@ -1,0 +1,663 @@
+#!/usr/bin/env python3
+"""
+Generate a unified dynamic dashboard HTML file
+"""
+
+dashboard_html = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Email Campaign Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Company-specific body backgrounds */
+        body.teamficient { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+        body.accusights { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        body.hirealatino { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+        body.mydriveacademy { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        body.idrivio { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        body.archficient { background: linear-gradient(135deg, #003B5C 0%, #001F3F 100%); }
+        body.docficient { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Company-specific header backgrounds */
+        header.teamficient { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+        header.accusights { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        header.hirealatino { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); }
+        header.mydriveacademy { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        header.idrivio { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        header.archficient { background: linear-gradient(135deg, #003B5C 0%, #002844 100%); }
+        header.docficient { background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%); }
+
+        header h1 {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .back-btn {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .filters-section {
+            background: #f8f9fa;
+            padding: 25px 40px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .clear-filters-btn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .clear-filters-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .dashboard-content {
+            padding: 40px;
+        }
+
+        .kpi-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .kpi-card.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .kpi-card.success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        .kpi-card.warning {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }
+
+        .kpi-card.info {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .kpi-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-card h3 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 100px 20px;
+            color: #EF4444;
+            background: white;
+            margin: 20px;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">Loading dashboard data...</div>
+    <div class="container" id="dashboardContainer" style="display: none;">
+        <header id="header">
+            <h1 id="companyTitle">Email Campaign Dashboard</h1>
+            <a href="index.html" class="back-btn">← Back to Companies</a>
+        </header>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="campaignFilter">Campaign</label>
+                <select id="campaignFilter">
+                    <option value="">All Campaigns</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="dateFilter">Date</label>
+                <select id="dateFilter">
+                    <option value="">All Dates</option>
+                </select>
+            </div>
+            <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="kpi-section">
+                <div class="kpi-card primary">
+                    <div class="kpi-label">Total Leads</div>
+                    <div class="kpi-value" id="totalLeads">0</div>
+                    <div class="kpi-subtitle">Generated across campaigns</div>
+                </div>
+
+                <div class="kpi-card success">
+                    <div class="kpi-label">Avg Open Rate</div>
+                    <div class="kpi-value" id="avgOpenRate">0%</div>
+                    <div class="kpi-subtitle">Campaign engagement</div>
+                </div>
+
+                <div class="kpi-card warning">
+                    <div class="kpi-label">Total Opened</div>
+                    <div class="kpi-value" id="totalOpened">0</div>
+                    <div class="kpi-subtitle">Email opens</div>
+                </div>
+
+                <div class="kpi-card info">
+                    <div class="kpi-label">Total Clicked</div>
+                    <div class="kpi-value" id="totalClicked">0</div>
+                    <div class="kpi-subtitle">Link interactions</div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-card full-width">
+                    <h3>Performance Over Time</h3>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Leads by Campaign</h3>
+                    <div class="chart-container">
+                        <canvas id="campaignChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Engagement Metrics</h3>
+                    <div class="chart-container">
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let currentCompany = '';
+        let charts = {
+            performance: null,
+            campaign: null,
+            engagement: null
+        };
+
+        // Get company from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        currentCompany = urlParams.get('company') || 'TeamFicient';
+
+        // Company-specific configurations
+        const companyConfig = {
+            'TeamFicient': { class: 'teamficient', title: 'TeamFicient' },
+            'AccuSights': { class: 'accusights', title: 'AccuSights' },
+            'HireALatino': { class: 'hirealatino', title: 'HireALatino' },
+            'MyDrive Academy': { class: 'mydriveacademy', title: 'MyDrive Academy' },
+            'iDrivio': { class: 'idrivio', title: 'iDrivio' },
+            'ArchFicient': { class: 'archficient', title: 'ArchFicient' },
+            'DocFicient': { class: 'docficient', title: 'DocFicient' }
+        };
+
+        // Load data
+        async function loadData() {
+            try {
+                const response = await fetch('all_companies_data.json');
+                const allCompaniesData = await response.json();
+
+                allData = allCompaniesData[currentCompany] || [];
+
+                if (allData.length === 0) {
+                    throw new Error('No data found for ' + currentCompany);
+                }
+
+                // Apply company styling
+                const config = companyConfig[currentCompany];
+                document.body.className = config.class;
+                document.getElementById('header').className = config.class;
+                document.getElementById('companyTitle').textContent = config.title + ' - Campaign Dashboard';
+                document.getElementById('pageTitle').textContent = config.title + ' Dashboard';
+
+                // Hide loading, show dashboard
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+
+                // Initialize dashboard
+                initializeFilters();
+                updateDashboard();
+            } catch (error) {
+                document.getElementById('loading').innerHTML =
+                    '<div class="error"><h2>Error Loading Dashboard</h2><p>' + error.message + '</p><a href="index.html" class="back-btn">Back to Companies</a></div>';
+                console.error('Error:', error);
+            }
+        }
+
+        // Process data into standard format
+        function processData(data) {
+            return data.map(item => ({
+                date: item['Date Sent'] || item['date'] || '',
+                campaign: item['Email Content Used'] || item['campaign'] || item['Industry'] || 'Unknown',
+                industry: item['Industry'] || item['industry'] || '',
+                leads: parseInt(item['Leads Generated'] || item['leads'] || 0),
+                opened: parseInt(item['Opened'] || item['opened'] || 0),
+                clicked: parseInt(item['Clicked'] || item['clicked'] || 0),
+                delivered: parseInt(item['Delivered'] || item['delivered'] || item['Leads Generated'] || 0),
+                openRate: parseFloat(item['Open Rate %'] || item['openRate'] || 0)
+            }));
+        }
+
+        function initializeFilters() {
+            const processedData = processData(allData);
+            const campaigns = [...new Set(processedData.map(d => d.campaign).filter(c => c))];
+            const dates = [...new Set(processedData.map(d => d.date).filter(d => d))].sort();
+
+            const campaignFilter = document.getElementById('campaignFilter');
+            const dateFilter = document.getElementById('dateFilter');
+
+            campaigns.forEach(campaign => {
+                const option = document.createElement('option');
+                option.value = campaign;
+                option.textContent = campaign;
+                campaignFilter.appendChild(option);
+            });
+
+            dates.forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                try {
+                    const dateObj = new Date(date + 'T00:00:00');
+                    option.textContent = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                } catch (e) {
+                    option.textContent = date;
+                }
+                dateFilter.appendChild(option);
+            });
+
+            campaignFilter.addEventListener('change', updateDashboard);
+            dateFilter.addEventListener('change', updateDashboard);
+        }
+
+        function clearFilters() {
+            document.getElementById('campaignFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            updateDashboard();
+        }
+
+        function getFilteredData() {
+            const campaignFilter = document.getElementById('campaignFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const processedData = processData(allData);
+
+            return processedData.filter(item => {
+                const matchesCampaign = !campaignFilter || item.campaign === campaignFilter;
+                const matchesDate = !dateFilter || item.date === dateFilter;
+                return matchesCampaign && matchesDate;
+            });
+        }
+
+        function updateDashboard() {
+            const data = getFilteredData();
+
+            // Calculate KPIs
+            const totalLeads = data.reduce((sum, row) => sum + row.leads, 0);
+            const totalOpened = data.reduce((sum, row) => sum + row.opened, 0);
+            const totalClicked = data.reduce((sum, row) => sum + row.clicked, 0);
+            const avgOpenRate = data.length > 0 ? (data.reduce((sum, row) => sum + row.openRate, 0) / data.length * 100).toFixed(1) : 0;
+
+            document.getElementById('totalLeads').textContent = totalLeads.toLocaleString();
+            document.getElementById('avgOpenRate').textContent = avgOpenRate + '%';
+            document.getElementById('totalOpened').textContent = totalOpened.toLocaleString();
+            document.getElementById('totalClicked').textContent = totalClicked.toLocaleString();
+
+            // Update charts
+            updatePerformanceChart(data);
+            updateCampaignChart(data);
+            updateEngagementChart(data);
+        }
+
+        function updatePerformanceChart(data) {
+            const dates = [...new Set(data.map(d => d.date))].sort();
+            const dateData = dates.map(date => {
+                const dayData = data.filter(d => d.date === date);
+                return {
+                    date,
+                    leads: dayData.reduce((sum, d) => sum + d.leads, 0),
+                    opened: dayData.reduce((sum, d) => sum + d.opened, 0),
+                    clicked: dayData.reduce((sum, d) => sum + d.clicked, 0)
+                };
+            });
+
+            const ctx = document.getElementById('performanceChart');
+
+            if (charts.performance) {
+                charts.performance.destroy();
+            }
+
+            charts.performance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dateData.map(d => {
+                        try {
+                            const dateObj = new Date(d.date + 'T00:00:00');
+                            return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        } catch (e) {
+                            return d.date;
+                        }
+                    }),
+                    datasets: [
+                        {
+                            label: 'Leads Generated',
+                            data: dateData.map(d => d.leads),
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Emails Opened',
+                            data: dateData.map(d => d.opened),
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Links Clicked',
+                            data: dateData.map(d => d.clicked),
+                            borderColor: '#F43F5E',
+                            backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCampaignChart(data) {
+            const campaigns = {};
+            data.forEach(row => {
+                campaigns[row.campaign] = (campaigns[row.campaign] || 0) + row.leads;
+            });
+
+            const ctx = document.getElementById('campaignChart');
+
+            if (charts.campaign) {
+                charts.campaign.destroy();
+            }
+
+            charts.campaign = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(campaigns),
+                    datasets: [{
+                        data: Object.values(campaigns),
+                        backgroundColor: [
+                            '#3B82F6', '#10B981', '#F43F5E', '#F59E0B', '#8B5CF6',
+                            '#06b6d4', '#ec4899', '#fbbf24', '#a855f7', '#14b8a6',
+                            '#f97316', '#84cc16', '#06b6d4', '#6366f1', '#d946ef'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateEngagementChart(data) {
+            const totalOpened = data.reduce((sum, row) => sum + row.opened, 0);
+            const totalClicked = data.reduce((sum, row) => sum + row.clicked, 0);
+            const totalDelivered = data.reduce((sum, row) => sum + row.delivered, 0);
+
+            const ctx = document.getElementById('engagementChart');
+
+            if (charts.engagement) {
+                charts.engagement.destroy();
+            }
+
+            charts.engagement = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Opened', 'Clicked'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [totalOpened, totalClicked],
+                        backgroundColor: ['#10B981', '#F43F5E']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    if (totalDelivered > 0) {
+                                        const percentage = ((context.parsed.y / totalDelivered) * 100).toFixed(2);
+                                        return percentage + '% of delivered';
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize on page load
+        loadData();
+    </script>
+</body>
+</html>
+'''
+
+# Write the file
+with open('dashboard.html', 'w', encoding='utf-8') as f:
+    f.write(dashboard_html)
+
+print("SUCCESS: Unified dashboard.html created!")
+print("  - Dynamically loads data from all_companies_data.json")
+print("  - Applies company-specific styling based on URL parameter")
+print("  - Works with all 7 companies")

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Campaign Dashboard - Company Selection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .companies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .company-card {
+            background: white;
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .company-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--card-color-1), var(--card-color-2));
+        }
+
+        .company-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .company-card h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .company-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .company-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--card-color-1), var(--card-color-2));
+        }
+
+        /* Company-specific colors */
+        .teamficient {
+            --card-color-1: #3B82F6;
+            --card-color-2: #2563EB;
+        }
+
+        .accusights {
+            --card-color-1: #667eea;
+            --card-color-2: #764ba2;
+        }
+
+        .hirealatino {
+            --card-color-1: #0ea5e9;
+            --card-color-2: #0284c7;
+        }
+
+        .mydriveacademy {
+            --card-color-1: #10b981;
+            --card-color-2: #059669;
+        }
+
+        .idrivio {
+            --card-color-1: #f59e0b;
+            --card-color-2: #d97706;
+        }
+
+        .archficient {
+            --card-color-1: #003B5C;
+            --card-color-2: #001F3F;
+        }
+
+        .docficient {
+            --card-color-1: #8B5CF6;
+            --card-color-2: #7C3AED;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            opacity: 0.9;
+        }
+
+        .footer p {
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 36px;
+            }
+
+            .companies-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Email Campaign Dashboards</h1>
+            <p>Select a company to view detailed campaign analytics</p>
+        </header>
+
+        <div class="companies-grid">
+            <a href="dashboard_teamficient.html" class="company-card teamficient">
+                <div class="company-icon">TF</div>
+                <h2>TeamFicient</h2>
+                <div class="company-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campaigns</div>
+                        <div class="stat-value">19</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Leads</div>
+                        <div class="stat-value">2.7K</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="dashboard_accusights.html" class="company-card accusights">
+                <div class="company-icon">AS</div>
+                <h2>AccuSights</h2>
+                <div class="company-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campaigns</div>
+                        <div class="stat-value">36</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Leads</div>
+                        <div class="stat-value">5.3K</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="dashboard_hirealatino.html" class="company-card hirealatino">
+                <div class="company-icon">HAL</div>
+                <h2>HireALatino</h2>
+                <div class="company-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campaigns</div>
+                        <div class="stat-value">11</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Leads</div>
+                        <div class="stat-value">1.3K</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="dashboard_mydriveacademy.html" class="company-card mydriveacademy">
+                <div class="company-icon">MDA</div>
+                <h2>MyDrive Academy</h2>
+                <div class="company-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campaigns</div>
+                        <div class="stat-value">15</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Leads</div>
+                        <div class="stat-value">1.5K</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="dashboard_idrivio.html" class="company-card idrivio">
+                <div class="company-icon">ID</div>
+                <h2>iDrivio</h2>
+                <div class="company-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campaigns</div>
+                        <div class="stat-value">13</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Leads</div>
+                        <div class="stat-value">2.0K</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="dashboard_archficient.html" class="company-card archficient">
+                <div class="company-icon">AF</div>
+                <h2>ArchFicient</h2>
+                <div class="company-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campaigns</div>
+                        <div class="stat-value">11</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Leads</div>
+                        <div class="stat-value">3.1K</div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="dashboard_docficient.html" class="company-card docficient">
+                <div class="company-icon">DF</div>
+                <h2>DocFicient</h2>
+                <div class="company-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campaigns</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Leads</div>
+                        <div class="stat-value">0</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>Email Campaign Analytics Dashboard | 2026</p>
+            <p>Total: 105 campaigns across 7 companies | 15,820 leads generated (Sent only)</p>
+        </div>
+    </div>
+</body>
+</html>
