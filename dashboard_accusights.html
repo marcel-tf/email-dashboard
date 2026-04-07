@@ -102,6 +102,22 @@
             border-color: #667eea;
         }
 
+        .filter-group .date-input {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .filter-group .date-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
         .clear-filters-btn {
             padding: 10px 25px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -253,10 +269,12 @@
                 </select>
             </div>
             <div class="filter-group">
-                <label for="dateFilter">Date</label>
-                <select id="dateFilter">
-                    <option value="">All Dates</option>
-                </select>
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" class="date-input">
+            </div>
+            <div class="filter-group">
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" class="date-input">
             </div>
             <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
         </div>
@@ -316,7 +334,7 @@
     </div>
 
     <script>
-        // Data embedded from Excel - Last updated: 2026-04-07 14:01
+        // Data embedded from Excel - Last updated: 2026-04-07 16:00
         // IMPORTANTE: Solo campañas con Status='Sent'
         const allData = [
             {
@@ -1001,10 +1019,10 @@
         function initializeFilters() {
             const processedData = processData(allData);
             const campaigns = [...new Set(processedData.map(d => d.campaign).filter(c => c))];
-            const dates = [...new Set(processedData.map(d => d.date).filter(d => d && d !== 'NaT'))].sort();
 
             const campaignFilter = document.getElementById('campaignFilter');
-            const dateFilter = document.getElementById('dateFilter');
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
 
             campaigns.forEach(campaign => {
                 const option = document.createElement('option');
@@ -1013,31 +1031,36 @@
                 campaignFilter.appendChild(option);
             });
 
-            dates.forEach(date => {
-                const option = document.createElement('option');
-                option.value = date;
-                option.textContent = formatDisplayDate(date);
-                dateFilter.appendChild(option);
-            });
-
+            // Event listeners for filters
             campaignFilter.addEventListener('change', updateDashboard);
-            dateFilter.addEventListener('change', updateDashboard);
+            startDateInput.addEventListener('change', updateDashboard);
+            endDateInput.addEventListener('change', updateDashboard);
         }
 
         function clearFilters() {
             document.getElementById('campaignFilter').value = '';
-            document.getElementById('dateFilter').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
             updateDashboard();
         }
 
         function getFilteredData() {
             const campaignFilter = document.getElementById('campaignFilter').value;
-            const dateFilter = document.getElementById('dateFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
             const processedData = processData(allData);
 
             return processedData.filter(item => {
                 const matchesCampaign = !campaignFilter || item.campaign === campaignFilter;
-                const matchesDate = !dateFilter || item.date === dateFilter;
+
+                // Date range filtering
+                let matchesDate = true;
+                if (startDate || endDate) {
+                    const itemDate = item.date;
+                    if (startDate && itemDate < startDate) matchesDate = false;
+                    if (endDate && itemDate > endDate) matchesDate = false;
+                }
+
                 return matchesCampaign && matchesDate;
             });
         }

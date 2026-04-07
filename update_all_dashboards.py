@@ -173,29 +173,54 @@ def read_replies_data(sheet_name):
 
 def get_category_class(category):
     """Mapea categoría a clase CSS"""
-    category_lower = category.lower()
-    if 'not interested' in category_lower or 'unsubscribe' in category_lower or 'negative' in category_lower:
+    category_lower = category.lower().strip()
+
+    # SOLD es especial - ventas generadas!
+    if 'sold' in category_lower:
+        return 'sold'
+    elif 'not interested' in category_lower or 'invalid' in category_lower or 'wrong contact' in category_lower:
         return 'negative'
-    elif 'hot' in category_lower or 'meeting' in category_lower or 'interested' in category_lower:
+    elif 'hot' in category_lower or 'meeting' in category_lower:
         return 'hot-lead'
-    elif 'engaged' in category_lower or 'positive' in category_lower:
+    elif 'engaged' in category_lower or 'interested' in category_lower:
         return 'interested'
+    elif 'follow' in category_lower or 'pipeline' in category_lower or 'circle back' in category_lower:
+        return 'follow-up'
+    elif 'existing client' in category_lower or 'no action' in category_lower:
+        return 'neutral'
     else:
         return 'neutral'
+
+def get_category_color(cat_class):
+    """Retorna el color para una categoría"""
+    colors = {
+        'sold': '#FFD700',
+        'negative': '#EF4444',
+        'hot-lead': '#10B981',
+        'interested': '#3B82F6',
+        'follow-up': '#F59E0B',
+        'neutral': '#8B5CF6'
+    }
+    return colors.get(cat_class, '#8B5CF6')
 
 def generate_replies_html(company_name, company_data, replies_data):
     """Genera el HTML de replies"""
 
     colors = company_data['colors']
 
-    # Calcular estadísticas
+    # Calcular estadísticas - USAR CATEGORÍAS REALES
     total_replies = len(replies_data)
-    category_counts = {'negative': 0, 'hot-lead': 0, 'interested': 0, 'neutral': 0}
 
+    # Contar por categoría REAL
+    real_category_counts = {}
     for reply in replies_data:
-        category = reply.get('Category', 'Neutral')
-        cat_class = get_category_class(category)
-        category_counts[cat_class] += 1
+        category = reply.get('Category', 'Unknown')
+        if category not in real_category_counts:
+            real_category_counts[category] = 0
+        real_category_counts[category] += 1
+
+    # Ordenar categorías: Sold primero, luego el resto alfabéticamente
+    sorted_categories = sorted(real_category_counts.keys(), key=lambda x: (x.lower() != 'sold', x.lower()))
 
     # Generar HTML de tarjetas de respuestas
     replies_html = ''
@@ -468,6 +493,25 @@ def generate_replies_html(company_name, company_data, replies_data):
             color: white;
         }}
 
+        .response-category.sold {{
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            font-weight: 700;
+            font-size: 13px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            animation: pulse-sold 2s ease-in-out infinite;
+        }}
+
+        @keyframes pulse-sold {{
+            0%, 100% {{ box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5); }}
+            50% {{ box-shadow: 0 4px 25px rgba(255, 215, 0, 0.8); }}
+        }}
+
+        .response-category.follow-up {{
+            background: #F59E0B;
+            color: white;
+        }}
+
         .response-details {{
             margin-bottom: 15px;
         }}
@@ -549,6 +593,23 @@ def generate_replies_html(company_name, company_data, replies_data):
             border-color: #8B5CF6;
         }}
 
+        .filter-btn.sold {{
+            border: 3px solid #FFD700;
+            font-weight: 700;
+        }}
+
+        .filter-btn.sold.active {{
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-color: #FFD700;
+            color: #000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+        }}
+
+        .filter-btn.follow-up.active {{
+            background: #F59E0B;
+            border-color: #F59E0B;
+        }}
+
         @media (max-width: 768px) {{
             .summary-section {{
                 grid-template-columns: 1fr;
@@ -583,24 +644,12 @@ def generate_replies_html(company_name, company_data, replies_data):
                 </div>
 
                 <div class="chart-card">
-                    <h2>Response Statistics</h2>
+                    <h2>Response Statistics by Category</h2>
                     <div class="stats-grid">
-                        <div class="stat-item negative">
-                            <div class="stat-label">Negative/Unsubscribe</div>
-                            <div class="stat-value">{category_counts['negative']} <span class="stat-percentage">({category_counts['negative']/total_replies*100 if total_replies > 0 else 0:.0f}%)</span></div>
-                        </div>
-                        <div class="stat-item interested">
-                            <div class="stat-label">Interested/Engaged</div>
-                            <div class="stat-value">{category_counts['interested']} <span class="stat-percentage">({category_counts['interested']/total_replies*100 if total_replies > 0 else 0:.0f}%)</span></div>
-                        </div>
-                        <div class="stat-item hot-lead">
-                            <div class="stat-label">Hot Lead/Meeting</div>
-                            <div class="stat-value">{category_counts['hot-lead']} <span class="stat-percentage">({category_counts['hot-lead']/total_replies*100 if total_replies > 0 else 0:.0f}%)</span></div>
-                        </div>
-                        <div class="stat-item neutral">
-                            <div class="stat-label">Neutral/Acknowledgment</div>
-                            <div class="stat-value">{category_counts['neutral']} <span class="stat-percentage">({category_counts['neutral']/total_replies*100 if total_replies > 0 else 0:.0f}%)</span></div>
-                        </div>
+                        {''.join([f'''<div class="stat-item {get_category_class(cat)}">
+                            <div class="stat-label">{cat}</div>
+                            <div class="stat-value">{real_category_counts[cat]} <span class="stat-percentage">({real_category_counts[cat]/total_replies*100 if total_replies > 0 else 0:.0f}%)</span></div>
+                        </div>''' for cat in sorted_categories])}
                     </div>
                 </div>
             </div>
@@ -610,10 +659,7 @@ def generate_replies_html(company_name, company_data, replies_data):
 
                 <div class="filter-buttons">
                     <button class="filter-btn all active" onclick="filterResponses('all')">All ({total_replies})</button>
-                    <button class="filter-btn negative" onclick="filterResponses('negative')">Negative ({category_counts['negative']})</button>
-                    <button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead ({category_counts['hot-lead']})</button>
-                    <button class="filter-btn interested" onclick="filterResponses('interested')">Interested ({category_counts['interested']})</button>
-                    <button class="filter-btn neutral" onclick="filterResponses('neutral')">Neutral ({category_counts['neutral']})</button>
+                    {''.join([f'''<button class="filter-btn {get_category_class(cat)}" onclick="filterResponses('{get_category_class(cat)}')">{cat} ({real_category_counts[cat]})</button>''' for cat in sorted_categories])}
                 </div>
 
                 <div id="responsesContainer">
@@ -624,19 +670,16 @@ def generate_replies_html(company_name, company_data, replies_data):
     </div>
 
     <script>
-        // Create response distribution chart
+        // Create response distribution chart with REAL categories
         const ctx = document.getElementById('responseChart');
         new Chart(ctx, {{
             type: 'doughnut',
             data: {{
-                labels: ['Negative/Unsubscribe', 'Interested/Engaged', 'Hot Lead/Meeting', 'Neutral/Acknowledgment'],
+                labels: [{','.join([f"'{cat}'" for cat in sorted_categories])}],
                 datasets: [{{
-                    data: [{category_counts['negative']}, {category_counts['interested']}, {category_counts['hot-lead']}, {category_counts['neutral']}],
+                    data: [{','.join([str(real_category_counts[cat]) for cat in sorted_categories])}],
                     backgroundColor: [
-                        '#EF4444',
-                        '#3B82F6',
-                        '#10B981',
-                        '#8B5CF6'
+                        {','.join([f"'{get_category_color(get_category_class(cat))}'" for cat in sorted_categories])}
                     ],
                     borderWidth: 0
                 }}]
@@ -828,6 +871,22 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
             border-color: {colors['primary']};
         }}
 
+        .filter-group .date-input {{
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }}
+
+        .filter-group .date-input:focus {{
+            outline: none;
+            border-color: {colors['primary']};
+        }}
+
         .clear-filters-btn {{
             padding: 10px 25px;
             background: {colors['body_gradient']};
@@ -979,10 +1038,12 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
                 </select>
             </div>
             <div class="filter-group">
-                <label for="dateFilter">Date</label>
-                <select id="dateFilter">
-                    <option value="">All Dates</option>
-                </select>
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" class="date-input">
+            </div>
+            <div class="filter-group">
+                <label for="endDate">End Date</label>
+                <input type="date" id="endDate" class="date-input">
             </div>
             <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
         </div>
@@ -1101,10 +1162,10 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
         function initializeFilters() {{
             const processedData = processData(allData);
             const campaigns = [...new Set(processedData.map(d => d.campaign).filter(c => c))];
-            const dates = [...new Set(processedData.map(d => d.date).filter(d => d && d !== 'NaT'))].sort();
 
             const campaignFilter = document.getElementById('campaignFilter');
-            const dateFilter = document.getElementById('dateFilter');
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
 
             campaigns.forEach(campaign => {{
                 const option = document.createElement('option');
@@ -1113,31 +1174,36 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
                 campaignFilter.appendChild(option);
             }});
 
-            dates.forEach(date => {{
-                const option = document.createElement('option');
-                option.value = date;
-                option.textContent = formatDisplayDate(date);
-                dateFilter.appendChild(option);
-            }});
-
+            // Event listeners for filters
             campaignFilter.addEventListener('change', updateDashboard);
-            dateFilter.addEventListener('change', updateDashboard);
+            startDateInput.addEventListener('change', updateDashboard);
+            endDateInput.addEventListener('change', updateDashboard);
         }}
 
         function clearFilters() {{
             document.getElementById('campaignFilter').value = '';
-            document.getElementById('dateFilter').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
             updateDashboard();
         }}
 
         function getFilteredData() {{
             const campaignFilter = document.getElementById('campaignFilter').value;
-            const dateFilter = document.getElementById('dateFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
             const processedData = processData(allData);
 
             return processedData.filter(item => {{
                 const matchesCampaign = !campaignFilter || item.campaign === campaignFilter;
-                const matchesDate = !dateFilter || item.date === dateFilter;
+
+                // Date range filtering
+                let matchesDate = true;
+                if (startDate || endDate) {{
+                    const itemDate = item.date;
+                    if (startDate && itemDate < startDate) matchesDate = false;
+                    if (endDate && itemDate > endDate) matchesDate = false;
+                }}
+
                 return matchesCampaign && matchesDate;
             }});
         }}

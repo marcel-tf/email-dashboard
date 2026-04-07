@@ -1,0 +1,110 @@
+================================================================================
+INSTRUCCIONES PARA PUBLICAR EN GITHUB PAGES
+================================================================================
+
+✅ COMPLETADO:
+- Git inicializado
+- Archivos agregados (Excel protegido por .gitignore)
+- Primer commit realizado
+
+================================================================================
+PASO 4: CREAR REPOSITORIO EN GITHUB
+================================================================================
+
+1. Ve a: https://github.com/new
+
+2. Configura:
+   - Repository name: email-dashboard (o el que prefieras)
+   - Description: Email Campaign Analytics Dashboard
+   - Visibility: Private (recomendado) o Public
+   - ❌ NO marques "Add a README file"
+   - ❌ NO agregues .gitignore
+   - ❌ NO agregues license
+
+3. Clic en "Create repository"
+
+================================================================================
+PASO 5: CONECTAR Y SUBIR
+================================================================================
+
+Después de crear el repo, abre Git Bash o Terminal en esta carpeta y ejecuta:
+
+# Reemplaza TU-USUARIO con tu usuario de GitHub
+git remote add origin https://github.com/TU-USUARIO/email-dashboard.git
+
+# Cambiar el nombre de la rama a main (GitHub usa 'main' ahora)
+git branch -M main
+
+# Subir los archivos
+git push -u origin main
+
+================================================================================
+PASO 6: ACTIVAR GITHUB PAGES
+================================================================================
+
+1. En tu repositorio de GitHub, ve a: Settings → Pages
+
+2. En "Source", selecciona:
+   - Branch: main
+   - Folder: / (root)
+
+3. Clic en "Save"
+
+4. Espera 1-2 minutos
+
+5. GitHub te mostrará la URL de tu sitio:
+   https://TU-USUARIO.github.io/email-dashboard/
+
+================================================================================
+PASO 7: ACTUALIZAR EL README CON LA URL REAL
+================================================================================
+
+Una vez que tengas la URL, actualiza el README.md:
+- Busca la línea: ## 🌐 [Ver Dashboard en Vivo](https://tu-usuario.github.io/email-dashboard/)
+- Reemplaza con tu URL real
+
+Luego haz commit y push:
+
+git add README.md
+git commit -m "Update live demo URL"
+git push
+
+================================================================================
+PARA ACTUALIZACIONES FUTURAS
+================================================================================
+
+Cuando actualices los dashboards:
+
+1. Regenera los dashboards:
+   python update_all_dashboards.py
+
+2. Haz commit y push:
+   git add .
+   git commit -m "Update dashboards with latest data"
+   git push
+
+3. Los cambios aparecerán en la web en 1-2 minutos
+
+================================================================================
+NOTAS IMPORTANTES
+================================================================================
+
+✅ El archivo Excel NO se sube (protegido por .gitignore)
+✅ Los dashboards HTML funcionan sin el Excel (datos embebidos)
+✅ El sitio es completamente estático (no necesita servidor)
+✅ Puedes hacer el repositorio Private y seguirá funcionando GitHub Pages
+
+================================================================================
+¿PROBLEMAS?
+================================================================================
+
+Si el sitio no carga:
+1. Verifica que GitHub Pages esté activado en Settings → Pages
+2. Verifica que la rama sea 'main'
+3. Espera 5 minutos (la primera vez puede tardar más)
+4. Limpia el caché del navegador (Ctrl + F5)
+
+Si necesitas cambiar la URL:
+- En Settings → Pages puedes ver y cambiar la configuración
+
+================================================================================
