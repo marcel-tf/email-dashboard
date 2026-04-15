@@ -178,30 +178,40 @@ def get_category_class(category):
     # SOLD es especial - ventas generadas!
     if 'sold' in category_lower:
         return 'sold'
-    elif 'not interested' in category_lower or 'invalid' in category_lower or 'wrong contact' in category_lower:
-        return 'negative'
+    elif 'not interested' in category_lower:
+        return 'not-interested'
+    elif 'invalid' in category_lower or 'wrong contact' in category_lower:
+        return 'invalid'
     elif 'hot' in category_lower or 'meeting' in category_lower:
         return 'hot-lead'
-    elif 'engaged' in category_lower or 'interested' in category_lower:
-        return 'interested'
-    elif 'follow' in category_lower or 'pipeline' in category_lower or 'circle back' in category_lower:
+    elif 'engaged' in category_lower and 'interested' in category_lower:
+        return 'engaged-interested'
+    elif 'follow' in category_lower:
         return 'follow-up'
-    elif 'existing client' in category_lower or 'no action' in category_lower:
-        return 'neutral'
+    elif 'pipeline' in category_lower or 'circle back' in category_lower:
+        return 'pipelined'
+    elif 'no action' in category_lower:
+        return 'no-action'
+    elif 'existing client' in category_lower:
+        return 'existing-client'
     else:
         return 'neutral'
 
 def get_category_color(cat_class):
-    """Retorna el color para una categoría"""
+    """Retorna el color para una categoría - ACTUALIZADO con nuevos colores"""
     colors = {
-        'sold': '#FFD700',
-        'negative': '#EF4444',
-        'hot-lead': '#10B981',
-        'interested': '#3B82F6',
-        'follow-up': '#F59E0B',
-        'neutral': '#8B5CF6'
+        'sold': '#fbbf24',              # Gold - Maximum achievement
+        'not-interested': '#9ca3af',     # Gray - Not interested
+        'invalid': '#4b5563',            # Dark Gray - Invalid contact
+        'hot-lead': '#3b82f6',           # Blue - Hot lead/Meeting scheduled
+        'engaged-interested': '#10b981', # Green - Engaged/Interested
+        'follow-up': '#d4a574',          # Beige - Follow-up needed
+        'pipelined': '#06b6d4',          # Cyan - Pipelined/Circle back
+        'no-action': '#8b5cf6',          # Purple - No action needed
+        'existing-client': '#ec4899',    # Pink - Existing client
+        'neutral': '#94a3b8'             # Slate - Default
     }
-    return colors.get(cat_class, '#8B5CF6')
+    return colors.get(cat_class, '#94a3b8')
 
 def generate_replies_html(company_name, company_data, replies_data):
     """Genera el HTML de replies"""
@@ -222,9 +232,46 @@ def generate_replies_html(company_name, company_data, replies_data):
     # Ordenar categorías: Sold primero, luego el resto alfabéticamente
     sorted_categories = sorted(real_category_counts.keys(), key=lambda x: (x.lower() != 'sold', x.lower()))
 
+    # Función para parsear fecha (DD-MM-YYYY o YYYY-MM-DD HH:MM:SS)
+    def parse_date(date_str):
+        """Convierte fecha string a formato comparable YYYY-MM-DD"""
+        if not date_str:
+            return '1900-01-01'
+        # Limpiar espacios y manejar timestamps
+        date_str = str(date_str).strip().split(' ')[0]
+        parts = date_str.split('-')
+        if len(parts) == 3:
+            # Si el primer elemento tiene 2 dígitos, es DD-MM-YYYY
+            if len(parts[0]) == 2:
+                return f"{parts[2]}-{parts[1]}-{parts[0]}"  # Convertir a YYYY-MM-DD
+            # Si tiene 4 dígitos, ya es YYYY-MM-DD
+            else:
+                return date_str
+        return '1900-01-01'
+
+    # Función para formatear fecha a DD/MM/YYYY para mostrar
+    def format_date_display(date_str):
+        """Convierte cualquier formato de fecha a DD/MM/YYYY para mostrar"""
+        if not date_str:
+            return 'Unknown'
+        # Limpiar espacios y manejar timestamps
+        date_str = str(date_str).strip().split(' ')[0]
+        parts = date_str.split('-')
+        if len(parts) == 3:
+            # Si el primer elemento tiene 2 dígitos, es DD-MM-YYYY
+            if len(parts[0]) == 2:
+                return f"{parts[0]}/{parts[1]}/{parts[2]}"  # DD/MM/YYYY
+            # Si tiene 4 dígitos, es YYYY-MM-DD, convertir a DD/MM/YYYY
+            else:
+                return f"{parts[2]}/{parts[1]}/{parts[0]}"  # DD/MM/YYYY
+        return 'Unknown'
+
+    # Ordenar replies por fecha (más reciente primero)
+    sorted_replies = sorted(replies_data, key=lambda x: parse_date(x.get('Date', '')), reverse=True)
+
     # Generar HTML de tarjetas de respuestas
     replies_html = ''
-    for reply in replies_data:
+    for reply in sorted_replies:
         who = reply.get('Who', 'Unknown')
         email = reply.get('Email', '')
         message = reply.get('Reply/Calls', '')
@@ -232,16 +279,22 @@ def generate_replies_html(company_name, company_data, replies_data):
         subject = reply.get('Subject if email ', reply.get('Subject', ''))
         campaign = reply.get('Email Campaign', '')
         category = reply.get('Category', 'Neutral')
+        date_raw = reply.get('Date', '')
+        date_display = format_date_display(date_raw)  # Formato consistente DD/MM/YYYY
+        date_sortable = parse_date(date_raw)  # Formato para ordenar YYYY-MM-DD
         cat_class = get_category_class(category)
 
         replies_html += f'''
-        <div class="response-card {cat_class}" data-category="{cat_class}">
+        <div class="response-card {cat_class}" data-category="{cat_class}" data-date="{date_sortable}">
             <div class="response-header">
                 <div>
                     <div class="response-who">{who}</div>
                     <div class="response-email">{email}</div>
                 </div>
                 <div class="response-category {cat_class}">{category}</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> {date_display}
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -367,20 +420,45 @@ def generate_replies_html(company_name, company_data, replies_data):
             border-left: 5px solid;
         }}
 
-        .stat-item.negative {{
-            border-left-color: #EF4444;
+        .stat-item.not-interested {{
+            border-left-color: #9ca3af;
         }}
 
-        .stat-item.interested {{
-            border-left-color: #3B82F6;
+        .stat-item.engaged-interested {{
+            border-left-color: #10b981;
         }}
 
         .stat-item.hot-lead {{
-            border-left-color: #10B981;
+            border-left-color: #3b82f6;
+        }}
+
+        .stat-item.no-action {{
+            border-left-color: #8b5cf6;
+        }}
+
+        .stat-item.follow-up {{
+            border-left-color: #d4a574;
+        }}
+
+        .stat-item.pipelined {{
+            border-left-color: #06b6d4;
+        }}
+
+        .stat-item.invalid {{
+            border-left-color: #4b5563;
+        }}
+
+        .stat-item.sold {{
+            border-left-color: #fbbf24;
+            background: linear-gradient(to right, rgba(251, 191, 36, 0.05), white);
+        }}
+
+        .stat-item.existing-client {{
+            border-left-color: #ec4899;
         }}
 
         .stat-item.neutral {{
-            border-left-color: #8B5CF6;
+            border-left-color: #94a3b8;
         }}
 
         .stat-label {{
@@ -473,43 +551,80 @@ def generate_replies_html(company_name, company_data, replies_data):
             letter-spacing: 0.5px;
         }}
 
-        .response-category.negative {{
-            background: #EF4444;
+        /* Updated category colors */
+        .response-category.not-interested {{
+            background: #9ca3af;
             color: white;
         }}
 
-        .response-category.interested {{
-            background: #3B82F6;
+        .response-category.engaged-interested {{
+            background: #10b981;
             color: white;
         }}
 
         .response-category.hot-lead {{
-            background: #10B981;
+            background: #3b82f6;
             color: white;
         }}
 
-        .response-category.neutral {{
-            background: #8B5CF6;
+        .response-category.no-action {{
+            background: #8b5cf6;
+            color: white;
+        }}
+
+        .response-category.follow-up {{
+            background: #d4a574;
+            color: white;
+        }}
+
+        .response-category.pipelined {{
+            background: #06b6d4;
+            color: white;
+        }}
+
+        .response-category.invalid {{
+            background: #4b5563;
             color: white;
         }}
 
         .response-category.sold {{
-            background: linear-gradient(135deg, #FFD700, #FFA500);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #000;
             font-weight: 700;
             font-size: 13px;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
             animation: pulse-sold 2s ease-in-out infinite;
         }}
 
         @keyframes pulse-sold {{
-            0%, 100% {{ box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5); }}
-            50% {{ box-shadow: 0 4px 25px rgba(255, 215, 0, 0.8); }}
+            0%, 100% {{ box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5); }}
+            50% {{ box-shadow: 0 4px 25px rgba(251, 191, 36, 0.8); }}
         }}
 
-        .response-category.follow-up {{
-            background: #F59E0B;
+        .response-category.existing-client {{
+            background: #ec4899;
             color: white;
+        }}
+
+        .response-category.neutral {{
+            background: #94a3b8;
+            color: white;
+        }}
+
+        .response-date {{
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 15px;
+            display: inline-block;
+        }}
+
+        .date-icon {{
+            margin-right: 5px;
         }}
 
         .response-details {{
@@ -540,6 +655,66 @@ def generate_replies_html(company_name, company_data, replies_data):
             line-height: 1.6;
             color: #2c3e50;
             font-style: italic;
+        }}
+
+        .filters-container {{
+            margin-bottom: 25px;
+        }}
+
+        .date-filters {{
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }}
+
+        .date-filter-group {{
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }}
+
+        .date-filter-group label {{
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+
+        .date-input {{
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }}
+
+        .date-input:focus {{
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }}
+
+        .clear-dates-btn {{
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-end;
+        }}
+
+        .clear-dates-btn:hover {{
+            background: #dc2626;
+            transform: translateY(-1px);
         }}
 
         .filter-buttons {{
@@ -573,41 +748,61 @@ def generate_replies_html(company_name, company_data, replies_data):
             border-color: #2c3e50;
         }}
 
-        .filter-btn.negative.active {{
-            background: #EF4444;
-            border-color: #EF4444;
+        .filter-btn.not-interested.active {{
+            background: #9ca3af;
+            border-color: #9ca3af;
         }}
 
-        .filter-btn.interested.active {{
-            background: #3B82F6;
-            border-color: #3B82F6;
+        .filter-btn.engaged-interested.active {{
+            background: #10b981;
+            border-color: #10b981;
         }}
 
         .filter-btn.hot-lead.active {{
-            background: #10B981;
-            border-color: #10B981;
+            background: #3b82f6;
+            border-color: #3b82f6;
         }}
 
-        .filter-btn.neutral.active {{
-            background: #8B5CF6;
-            border-color: #8B5CF6;
+        .filter-btn.no-action.active {{
+            background: #8b5cf6;
+            border-color: #8b5cf6;
+        }}
+
+        .filter-btn.follow-up.active {{
+            background: #d4a574;
+            border-color: #d4a574;
+        }}
+
+        .filter-btn.pipelined.active {{
+            background: #06b6d4;
+            border-color: #06b6d4;
+        }}
+
+        .filter-btn.invalid.active {{
+            background: #4b5563;
+            border-color: #4b5563;
         }}
 
         .filter-btn.sold {{
-            border: 3px solid #FFD700;
+            border: 3px solid #fbbf24;
             font-weight: 700;
         }}
 
         .filter-btn.sold.active {{
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            border-color: #FFD700;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #fbbf24;
             color: #000;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
         }}
 
-        .filter-btn.follow-up.active {{
-            background: #F59E0B;
-            border-color: #F59E0B;
+        .filter-btn.existing-client.active {{
+            background: #ec4899;
+            border-color: #ec4899;
+        }}
+
+        .filter-btn.neutral.active {{
+            background: #94a3b8;
+            border-color: #94a3b8;
         }}
 
         @media (max-width: 768px) {{
@@ -657,9 +852,23 @@ def generate_replies_html(company_name, company_data, replies_data):
             <div class="responses-section">
                 <h2>All Responses ({total_replies})</h2>
 
-                <div class="filter-buttons">
-                    <button class="filter-btn all active" onclick="filterResponses('all')">All ({total_replies})</button>
-                    {''.join([f'''<button class="filter-btn {get_category_class(cat)}" onclick="filterResponses('{get_category_class(cat)}')">{cat} ({real_category_counts[cat]})</button>''' for cat in sorted_categories])}
+                <div class="filters-container">
+                    <div class="date-filters">
+                        <div class="date-filter-group">
+                            <label for="startDate">From Date</label>
+                            <input type="date" id="startDate" class="date-input" onchange="applyFilters()">
+                        </div>
+                        <div class="date-filter-group">
+                            <label for="endDate">To Date</label>
+                            <input type="date" id="endDate" class="date-input" onchange="applyFilters()">
+                        </div>
+                        <button class="clear-dates-btn" onclick="clearDateFilters()">Clear Dates</button>
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button class="filter-btn all active" onclick="filterResponses('all')">All ({total_replies})</button>
+                        {''.join([f'''<button class="filter-btn {get_category_class(cat)}" onclick="filterResponses('{get_category_class(cat)}')">{cat} ({real_category_counts[cat]})</button>''' for cat in sorted_categories])}
+                    </div>
                 </div>
 
                 <div id="responsesContainer">
@@ -670,7 +879,7 @@ def generate_replies_html(company_name, company_data, replies_data):
     </div>
 
     <script>
-        // Create response distribution chart with REAL categories
+        // Create response distribution chart with REAL categories (same style as dashboard)
         const ctx = document.getElementById('responseChart');
         new Chart(ctx, {{
             type: 'doughnut',
@@ -681,7 +890,8 @@ def generate_replies_html(company_name, company_data, replies_data):
                     backgroundColor: [
                         {','.join([f"'{get_category_color(get_category_class(cat))}'" for cat in sorted_categories])}
                     ],
-                    borderWidth: 0
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
                 }}]
             }},
             options: {{
@@ -689,12 +899,14 @@ def generate_replies_html(company_name, company_data, replies_data):
                 maintainAspectRatio: false,
                 plugins: {{
                     legend: {{
-                        position: 'bottom',
+                        position: 'right',
                         labels: {{
-                            padding: 20,
+                            padding: 12,
                             font: {{
-                                size: 13
-                            }}
+                                size: 11
+                            }},
+                            usePointStyle: true,
+                            pointStyle: 'circle'
                         }}
                     }},
                     tooltip: {{
@@ -704,7 +916,7 @@ def generate_replies_html(company_name, company_data, replies_data):
                                 const value = context.parsed || 0;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return label + ': ' + value + ' (' + percentage + '%)';
+                                return '  ' + label + ': ' + value + ' (' + percentage + '%)';
                             }}
                         }}
                     }}
@@ -712,27 +924,67 @@ def generate_replies_html(company_name, company_data, replies_data):
             }}
         }});
 
-        // Filter responses
+        // State for filters
+        let currentCategory = 'all';
+
+        // Filter responses by category
         function filterResponses(category) {{
-            const cards = document.querySelectorAll('.response-card');
+            currentCategory = category;
             const buttons = document.querySelectorAll('.filter-btn');
 
             // Update button states
             buttons.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // Filter cards
+            applyFilters();
+        }}
+
+        // Apply all filters (category + date)
+        function applyFilters() {{
+            const cards = document.querySelectorAll('.response-card');
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
             cards.forEach(card => {{
-                if (category === 'all') {{
-                    card.style.display = 'block';
-                }} else {{
-                    if (card.dataset.category === category) {{
-                        card.style.display = 'block';
-                    }} else {{
-                        card.style.display = 'none';
+                let show = true;
+
+                // Category filter
+                if (currentCategory !== 'all') {{
+                    if (card.dataset.category !== currentCategory) {{
+                        show = false;
                     }}
                 }}
+
+                // Date filter
+                if (show && (startDate || endDate)) {{
+                    const cardDate = card.dataset.date;
+                    if (startDate && cardDate < startDate) {{
+                        show = false;
+                    }}
+                    if (endDate && cardDate > endDate) {{
+                        show = false;
+                    }}
+                }}
+
+                card.style.display = show ? 'block' : 'none';
             }});
+
+            // Update count in "All" button
+            const visibleCards = document.querySelectorAll('.response-card[style="display: block;"]').length;
+            const allButton = document.querySelector('.filter-btn.all');
+            if (allButton) {{
+                const totalMatch = allButton.textContent.match(/\d+/);
+                if (totalMatch) {{
+                    allButton.textContent = `All (${{visibleCards}})`;
+                }}
+            }}
+        }}
+
+        // Clear date filters
+        function clearDateFilters() {{
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            applyFilters();
         }}
     </script>
 </body>
@@ -1391,6 +1643,1145 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
 '''
     return html
 
+def generate_improved_dashboard_teamficient(company_name, company_data, data_records, replies_data):
+    """Genera el dashboard MEJORADO para TeamFicient con todas las funcionalidades avanzadas"""
+
+    colors = company_data['colors']
+
+    # Convertir datos a formato JavaScript
+    js_campaign_data = json.dumps(data_records, indent=2, ensure_ascii=False)
+    js_replies_data = json.dumps(replies_data, indent=2, ensure_ascii=False)
+
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{company_name} - Email Campaign Dashboard (Enhanced)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: {colors['body_gradient']};
+            padding: 20px;
+            min-height: 100vh;
+        }}
+
+        .container {{
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }}
+
+        header {{
+            background: {colors['header_gradient']};
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+
+        header h1 {{
+            font-size: 32px;
+            font-weight: 600;
+        }}
+
+        .back-btn {{
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }}
+
+        .back-btn:hover {{
+            background: white;
+            color: {colors['primary']};
+        }}
+
+        .filters-section {{
+            background: #f8f9fa;
+            padding: 25px 40px;
+            border-bottom: 2px solid #e9ecef;
+        }}
+
+        .filter-row {{
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }}
+
+        .filter-group {{
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+            min-width: 200px;
+        }}
+
+        .filter-group label {{
+            font-size: 13px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+
+        .filter-group .date-input {{
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }}
+
+        .filter-group .date-input:focus {{
+            outline: none;
+            border-color: {colors['primary']};
+        }}
+
+        .multi-select-container {{
+            position: relative;
+            flex: 2;
+            min-width: 300px;
+        }}
+
+        .multi-select-button {{
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }}
+
+        .multi-select-button:hover {{
+            border-color: {colors['primary']};
+        }}
+
+        .multi-select-dropdown {{
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 5px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }}
+
+        .multi-select-dropdown.active {{
+            display: block;
+        }}
+
+        .multi-select-option {{
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+
+        .multi-select-option:hover {{
+            background: #f8f9fa;
+        }}
+
+        .multi-select-option input[type="checkbox"] {{
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }}
+
+        .clear-filters-btn {{
+            padding: 10px 25px;
+            background: {colors['body_gradient']};
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }}
+
+        .clear-filters-btn:hover {{
+            transform: translateY(-2px);
+        }}
+
+        .dashboard-content {{
+            padding: 40px;
+        }}
+
+        .kpi-section {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }}
+
+        .kpi-card {{
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }}
+
+        .kpi-card:hover {{
+            transform: translateY(-5px);
+        }}
+
+        .kpi-card.clickable {{
+            cursor: pointer;
+        }}
+
+        .kpi-card.clickable:hover {{
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }}
+
+        .kpi-card.primary {{
+            background: {colors['body_gradient']};
+            color: white;
+        }}
+
+        .kpi-card.success {{
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }}
+
+        .kpi-card.warning {{
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+        }}
+
+        .kpi-card.info {{
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            color: white;
+        }}
+
+        .kpi-card.purple {{
+            background: linear-gradient(135deg, #A855F7 0%, #9333EA 100%);
+            color: white;
+        }}
+
+        .kpi-card.cyan {{
+            background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+            color: white;
+        }}
+
+        .kpi-label {{
+            font-size: 11px;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }}
+
+        .kpi-value {{
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }}
+
+        .kpi-subtitle {{
+            font-size: 11px;
+            opacity: 0.8;
+        }}
+
+        .charts-section {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }}
+
+        .chart-card {{
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }}
+
+        .chart-card h3 {{
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }}
+
+        .chart-container {{
+            position: relative;
+            height: 350px;
+        }}
+
+        .chart-container.small {{
+            height: 300px;
+        }}
+
+        .chart-container.large {{
+            height: 500px;
+        }}
+
+        .full-width {{
+            grid-column: 1 / -1;
+        }}
+
+        @media (max-width: 1024px) {{
+            .charts-section {{
+                grid-template-columns: 1fr;
+            }}
+
+            .dashboard-content {{
+                padding: 20px;
+            }}
+
+            header {{
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }}
+
+            .kpi-section {{
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>{company_name} - Campaign Dashboard</h1>
+            <a href="index.html" class="back-btn">← Back to Companies</a>
+        </header>
+
+        <div class="filters-section">
+            <div class="filter-row">
+                <div class="multi-select-container">
+                    <label>Campaigns (Multi-Select)</label>
+                    <div class="multi-select-button" onclick="toggleMultiSelect()">
+                        <span id="selectedCampaignsText">All Campaigns Selected</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="multi-select-dropdown" id="campaignDropdown">
+                        <div class="multi-select-option">
+                            <input type="checkbox" id="selectAll" checked onchange="toggleSelectAll()">
+                            <label for="selectAll" style="cursor: pointer; font-weight: 600;">Select All</label>
+                        </div>
+                        <div id="campaignCheckboxes"></div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" class="date-input" onchange="updateDashboard()">
+                </div>
+                <div class="filter-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" class="date-input" onchange="updateDashboard()">
+                </div>
+                <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="kpi-section">
+                <div class="kpi-card primary">
+                    <div class="kpi-label">Total Leads</div>
+                    <div class="kpi-value" id="totalLeads">0</div>
+                    <div class="kpi-subtitle">Generated across campaigns</div>
+                </div>
+
+                <div class="kpi-card success">
+                    <div class="kpi-label">Avg Open Rate</div>
+                    <div class="kpi-value" id="avgOpenRate">0%</div>
+                    <div class="kpi-subtitle">Email engagement</div>
+                </div>
+
+                <div class="kpi-card warning">
+                    <div class="kpi-label">Total Clicked</div>
+                    <div class="kpi-value" id="totalClicked">0</div>
+                    <div class="kpi-subtitle">Link interactions</div>
+                </div>
+
+                <div class="kpi-card info clickable" onclick="window.location.href='replies_teamficient.html'">
+                    <div class="kpi-label">Total Replied</div>
+                    <div class="kpi-value" id="totalReplied">0</div>
+                    <div class="kpi-subtitle">Customer responses</div>
+                </div>
+
+                <div class="kpi-card purple">
+                    <div class="kpi-label">Reply Rate</div>
+                    <div class="kpi-value" id="replyRate">0%</div>
+                    <div class="kpi-subtitle">Of delivered emails</div>
+                </div>
+
+                <div class="kpi-card cyan">
+                    <div class="kpi-label">Click Rate</div>
+                    <div class="kpi-value" id="clickRate">0%</div>
+                    <div class="kpi-subtitle">CTR (click-through)</div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-card full-width">
+                    <h3>📊 Performance Over Time - Complete Campaign Analysis</h3>
+                    <p style="margin: -10px 0 15px 0; color: #64748b; font-size: 13px;">
+                        Shows Leads, Delivered, Opened, Clicked, Replied count + Open Rate % for each selected campaign
+                    </p>
+                    <div class="chart-container large">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Conversion Funnel</h3>
+                    <div class="chart-container small">
+                        <canvas id="funnelChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Reply Categories Distribution</h3>
+                    <div class="chart-container small">
+                        <canvas id="replyCategoriesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Top Performing Campaigns</h3>
+                    <div class="chart-container small">
+                        <canvas id="topCampaignsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Replies Timeline</h3>
+                    <div class="chart-container small">
+                        <canvas id="repliesTimelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ENHANCED DASHBOARD - Data embedded from Excel
+        window.campaignData = {js_campaign_data};
+        window.repliesData = {js_replies_data};
+
+        // Color scheme for charts
+        const chartColors = {{
+            primary: '{colors['primary']}',
+            success: '#10b981',
+            warning: '#f59e0b',
+            info: '#3b82f6',
+            purple: '#9333ea',
+            cyan: '#06b6d4'
+        }};
+
+        // Initialize dashboard on load
+        window.addEventListener('DOMContentLoaded', function() {{
+            initDashboard();
+        }});
+
+        // State management
+        let charts = {{}};
+        let selectedCampaigns = new Set();
+
+        // Helper function to normalize campaign names for flexible matching
+        function normalizeCampaignName(name) {{
+            return name
+                .toLowerCase()
+                .replace(/\s+/g, ' ')  // Normalize multiple spaces to single space
+                .replace(/\s*-\s*/g, ' ')  // Remove hyphens with surrounding spaces
+                .replace('email drip sequence', '')
+                .replace('batch 1', '')
+                .replace('batch', '')
+                .replace(/\s+/g, ' ')  // Normalize spaces again
+                .trim();
+        }}
+
+        // Helper function to check if a reply matches a campaign
+        function replyMatchesCampaign(replyCampaignName, campaignName) {{
+            const replyNormalized = normalizeCampaignName(replyCampaignName);
+            const campaignNormalized = normalizeCampaignName(campaignName);
+
+            // Try exact match first
+            if (replyNormalized === campaignNormalized) return true;
+
+            // Try partial match (reply campaign name contains the campaign name)
+            if (replyNormalized.includes(campaignNormalized)) return true;
+
+            // Try reverse partial match (campaign name contains reply campaign name)
+            if (campaignNormalized.includes(replyNormalized)) return true;
+
+            return false;
+        }}
+
+        // Initialize dashboard
+        function initDashboard() {{
+            populateCampaignCheckboxes();
+            updateDashboard();
+        }}
+
+        // Populate campaign checkboxes
+        function populateCampaignCheckboxes() {{
+            const container = document.getElementById('campaignCheckboxes');
+            const campaigns = [...new Set(window.campaignData.map(c => c.Industry))].sort();
+
+            campaigns.forEach(campaign => {{
+                selectedCampaigns.add(campaign);
+                const div = document.createElement('div');
+                div.className = 'multi-select-option';
+                div.innerHTML = `
+                    <input type="checkbox" id="campaign_${{campaign.replace(/[^a-zA-Z0-9]/g, '_')}}"
+                           value="${{campaign}}" checked onchange="updateCampaignSelection()">
+                    <label for="campaign_${{campaign.replace(/[^a-zA-Z0-9]/g, '_')}}" style="cursor: pointer;">${{campaign}}</label>
+                `;
+                container.appendChild(div);
+            }});
+        }}
+
+        // Toggle multi-select dropdown
+        function toggleMultiSelect() {{
+            const dropdown = document.getElementById('campaignDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }}
+
+        // Toggle select all checkbox
+        function toggleSelectAll() {{
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]');
+            checkboxes.forEach(cb => {{
+                cb.checked = selectAll.checked;
+            }});
+            updateCampaignSelection();
+        }}
+
+        // Update campaign selection
+        function updateCampaignSelection() {{
+            selectedCampaigns.clear();
+            const checkboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]:checked');
+            checkboxes.forEach(cb => selectedCampaigns.add(cb.value));
+
+            const selectAll = document.getElementById('selectAll');
+            const allCheckboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]');
+            selectAll.checked = checkboxes.length === allCheckboxes.length;
+
+            const text = selectedCampaigns.size === 0 ? 'No campaigns selected' :
+                        selectedCampaigns.size === allCheckboxes.length ? 'All Campaigns Selected' :
+                        `${{selectedCampaigns.size}} Campaign(s) Selected`;
+            document.getElementById('selectedCampaignsText').textContent = text;
+
+            updateDashboard();
+        }}
+
+        // Clear all filters
+        function clearFilters() {{
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = true);
+            document.getElementById('selectAll').checked = true;
+            selectedCampaigns.clear();
+            window.campaignData.forEach(c => selectedCampaigns.add(c.Industry));
+            document.getElementById('selectedCampaignsText').textContent = 'All Campaigns Selected';
+            updateDashboard();
+        }}
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function(e) {{
+            if (!e.target.matches('.multi-select-button') && !e.target.matches('.multi-select-button *')) {{
+                document.getElementById('campaignDropdown').style.display = 'none';
+            }}
+        }});
+
+        // Filter data based on selections
+        function getFilteredData() {{
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            return window.campaignData.filter(campaign => {{
+                if (selectedCampaigns.size > 0 && !selectedCampaigns.has(campaign.Industry)) {{
+                    return false;
+                }}
+
+                if (startDate && campaign['Date Sent'] < startDate) return false;
+                if (endDate && campaign['Date Sent'] > endDate) return false;
+
+                return true;
+            }});
+        }}
+
+        // Update dashboard with filtered data
+        function updateDashboard() {{
+            const filteredData = getFilteredData();
+            updateKPIs(filteredData);
+            renderAllCharts(filteredData);
+        }}
+
+        // Update KPIs
+        function updateKPIs(data) {{
+            const totalLeads = data.reduce((sum, c) => sum + (parseFloat(c['Leads Generated']) || 0), 0);
+            const totalDelivered = data.reduce((sum, c) => sum + (parseFloat(c.Delivered) || 0), 0);
+            const totalOpened = data.reduce((sum, c) => sum + (parseFloat(c.Opened) || 0), 0);
+            const totalClicked = data.reduce((sum, c) => sum + (parseFloat(c.Clicked) || 0), 0);
+
+            // Filter replies based on selected campaigns and dates (with flexible matching)
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const filteredReplies = window.repliesData.filter(reply => {{
+                // Check if reply matches any of the selected campaigns
+                const matchesCampaign = data.some(campaign =>
+                    replyMatchesCampaign(reply['Email Campaign'], campaign.Industry)
+                );
+
+                if (!matchesCampaign) return false;
+                if (startDate && reply.Date < startDate) return false;
+                if (endDate && reply.Date > endDate) return false;
+                return true;
+            }});
+
+            const totalReplied = filteredReplies.length;
+            const avgOpenRate = totalDelivered > 0 ? (totalOpened / totalDelivered * 100) : 0;
+            const replyRate = totalDelivered > 0 ? (totalReplied / totalDelivered * 100) : 0;
+            const clickRate = totalDelivered > 0 ? (totalClicked / totalDelivered * 100) : 0;
+
+            document.getElementById('totalLeads').textContent = totalLeads.toLocaleString();
+            document.getElementById('avgOpenRate').textContent = avgOpenRate.toFixed(1) + '%';
+            document.getElementById('totalClicked').textContent = totalClicked.toLocaleString();
+            document.getElementById('totalReplied').textContent = totalReplied.toLocaleString();
+            document.getElementById('replyRate').textContent = replyRate.toFixed(2) + '%';
+            document.getElementById('clickRate').textContent = clickRate.toFixed(2) + '%';
+        }}
+
+        // Render all charts
+        function renderAllCharts(data) {{
+            renderPerformanceChart(data);
+            renderFunnelChart(data);
+            renderReplyCategoriesChart();
+            renderTopCampaignsChart(data);
+            renderRepliesTimelineChart();
+        }}
+
+        // Performance Chart (Enhanced Multi-Metric with Campaign Details)
+        function renderPerformanceChart(data) {{
+            const ctx = document.getElementById('performanceChart');
+            if (charts.performance) charts.performance.destroy();
+
+            // Sort and prepare data with campaign information
+            const sortedData = [...data].sort((a, b) => a['Date Sent'].localeCompare(b['Date Sent']));
+
+            // Get replies for filtered campaigns
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const selectedCampaignNames = new Set(data.map(c => c.Industry));
+
+            // Create labels with campaign names
+            const labels = sortedData.map(c => {{
+                const date = new Date(c['Date Sent']).toLocaleDateString();
+                const campaignShort = c.Industry.length > 30 ? c.Industry.substring(0, 30) + '...' : c.Industry;
+                return `${{date}}\\n${{campaignShort}}`;
+            }});
+
+            // Prepare datasets with all metrics
+            const leadsData = sortedData.map(c => c['Leads Generated'] || 0);
+            const deliveredData = sortedData.map(c => c.Delivered || 0);
+            const openedData = sortedData.map(c => c.Opened || 0);
+            const clickedData = sortedData.map(c => c.Clicked || 0);
+
+            // Calculate replies per campaign (with flexible matching using helper function)
+            const repliesData = sortedData.map(c => {{
+                const campaignReplies = window.repliesData.filter(r => {{
+                    // Use helper function for flexible campaign matching
+                    if (!replyMatchesCampaign(r['Email Campaign'], c.Industry)) return false;
+
+                    // Apply date filters
+                    if (startDate && r.Date < startDate) return false;
+                    if (endDate && r.Date > endDate) return false;
+
+                    return true;
+                }});
+
+                return campaignReplies.length;
+            }});
+
+            // Calculate open rate as percentage
+            const openRateData = sortedData.map(c => ((c['Open Rate %'] || 0) * 100));
+
+            charts.performance = new Chart(ctx, {{
+                type: 'bar',
+                data: {{
+                    labels: labels,
+                    datasets: [
+                        {{
+                            label: 'Leads Generated',
+                            data: leadsData,
+                            backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                            borderColor: chartColors.primary,
+                            borderWidth: 2,
+                            yAxisID: 'y',
+                            type: 'bar',
+                            order: 2
+                        }},
+                        {{
+                            label: 'Delivered',
+                            data: deliveredData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                            borderColor: chartColors.info,
+                            borderWidth: 2,
+                            yAxisID: 'y',
+                            type: 'bar',
+                            order: 2
+                        }},
+                        {{
+                            label: 'Opened',
+                            data: openedData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: chartColors.success,
+                            borderWidth: 2,
+                            yAxisID: 'y',
+                            type: 'bar',
+                            order: 2
+                        }},
+                        {{
+                            label: 'Clicked',
+                            data: clickedData,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: chartColors.warning,
+                            borderWidth: 2,
+                            yAxisID: 'y',
+                            type: 'bar',
+                            order: 2
+                        }},
+                        {{
+                            label: 'Replied',
+                            data: repliesData,
+                            backgroundColor: 'rgba(147, 51, 234, 0.8)',
+                            borderColor: chartColors.purple,
+                            borderWidth: 2,
+                            yAxisID: 'y',
+                            type: 'bar',
+                            order: 2
+                        }},
+                        {{
+                            label: 'Open Rate %',
+                            data: openRateData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 3,
+                            yAxisID: 'y1',
+                            type: 'line',
+                            tension: 0.4,
+                            fill: false,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            order: 1
+                        }}
+                    ]
+                }},
+                options: {{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {{
+                        mode: 'index',
+                        intersect: false
+                    }},
+                    plugins: {{
+                        legend: {{
+                            display: true,
+                            position: 'top',
+                            labels: {{
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {{
+                                    size: 12,
+                                    weight: 'bold'
+                                }}
+                            }}
+                        }},
+                        tooltip: {{
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {{
+                                size: 14,
+                                weight: 'bold'
+                            }},
+                            bodyFont: {{
+                                size: 13
+                            }},
+                            padding: 12,
+                            callbacks: {{
+                                title: function(context) {{
+                                    const index = context[0].dataIndex;
+                                    const campaign = sortedData[index];
+                                    const date = new Date(campaign['Date Sent']).toLocaleDateString();
+                                    return `${{date}} - ${{campaign.Industry}}`;
+                                }},
+                                afterTitle: function(context) {{
+                                    const index = context[0].dataIndex;
+                                    const campaign = sortedData[index];
+                                    return `Status: ${{campaign.Status}} | CRM: ${{campaign['CRM Status']}}`;
+                                }},
+                                label: function(context) {{
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y;
+                                    if (label === 'Open Rate %') {{
+                                        return `  ${{label}}: ${{value.toFixed(1)}}%`;
+                                    }}
+                                    return `  ${{label}}: ${{value.toLocaleString()}}`;
+                                }}
+                            }}
+                        }}
+                    }},
+                    scales: {{
+                        x: {{
+                            stacked: false,
+                            ticks: {{
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {{
+                                    size: 10
+                                }},
+                                callback: function(value, index) {{
+                                    const campaign = sortedData[index];
+                                    const date = new Date(campaign['Date Sent']).toLocaleDateString();
+                                    const shortName = campaign.Industry.length > 20 ?
+                                        campaign.Industry.substring(0, 20) + '...' :
+                                        campaign.Industry;
+                                    return [date, shortName];
+                                }}
+                            }},
+                            grid: {{
+                                display: false
+                            }}
+                        }},
+                        y: {{
+                            type: 'linear',
+                            position: 'left',
+                            stacked: false,
+                            title: {{
+                                display: true,
+                                text: 'Count (Leads, Delivered, Opened, Clicked, Replied)',
+                                font: {{
+                                    size: 12,
+                                    weight: 'bold'
+                                }}
+                            }},
+                            beginAtZero: true,
+                            grid: {{
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }}
+                        }},
+                        y1: {{
+                            type: 'linear',
+                            position: 'right',
+                            title: {{
+                                display: true,
+                                text: 'Open Rate (%)',
+                                font: {{
+                                    size: 12,
+                                    weight: 'bold'
+                                }},
+                                color: '#ef4444'
+                            }},
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {{
+                                drawOnChartArea: false
+                            }},
+                            ticks: {{
+                                callback: function(value) {{
+                                    return value + '%';
+                                }},
+                                color: '#ef4444'
+                            }}
+                        }}
+                    }}
+                }}
+            }});
+        }}
+
+        // Funnel Chart
+        function renderFunnelChart(data) {{
+            const ctx = document.getElementById('funnelChart');
+            if (charts.funnel) charts.funnel.destroy();
+
+            const delivered = data.reduce((sum, c) => sum + (parseFloat(c.Delivered) || 0), 0);
+            const opened = data.reduce((sum, c) => sum + (parseFloat(c.Opened) || 0), 0);
+            const clicked = data.reduce((sum, c) => sum + (parseFloat(c.Clicked) || 0), 0);
+
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const filteredReplies = window.repliesData.filter(r => {{
+                // Use flexible campaign matching
+                const matchesCampaign = data.some(campaign =>
+                    replyMatchesCampaign(r['Email Campaign'], campaign.Industry)
+                );
+
+                if (!matchesCampaign) return false;
+                if (startDate && r.Date < startDate) return false;
+                if (endDate && r.Date > endDate) return false;
+                return true;
+            }});
+
+            charts.funnel = new Chart(ctx, {{
+                type: 'bar',
+                data: {{
+                    labels: ['Delivered', 'Opened', 'Clicked', 'Replied'],
+                    datasets: [{{
+                        label: 'Conversion Funnel',
+                        data: [delivered, opened, clicked, filteredReplies.length],
+                        backgroundColor: [chartColors.primary, chartColors.success, chartColors.warning, chartColors.info]
+                    }}]
+                }},
+                options: {{
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false
+                }}
+            }});
+        }}
+
+        // Reply Categories Chart
+        function renderReplyCategoriesChart() {{
+            const ctx = document.getElementById('replyCategoriesChart');
+            if (charts.replyCategories) charts.replyCategories.destroy();
+
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const filteredData = getFilteredData();
+
+            const filteredReplies = window.repliesData.filter(r => {{
+                // Use flexible campaign matching
+                const matchesCampaign = filteredData.some(campaign =>
+                    replyMatchesCampaign(r['Email Campaign'], campaign.Industry)
+                );
+
+                if (!matchesCampaign) return false;
+                if (startDate && r.Date < startDate) return false;
+                if (endDate && r.Date > endDate) return false;
+                return true;
+            }});
+
+            const categories = {{}};
+            filteredReplies.forEach(r => {{
+                const cat = r.Category || 'Unknown';
+                categories[cat] = (categories[cat] || 0) + 1;
+            }});
+
+            // Function to get color based on category name
+            const getCategoryColor = (category) => {{
+                const cat = category.toLowerCase();
+
+                // Not Interested - Gray
+                if (cat.includes('not interested')) return '#9ca3af';
+
+                // Engaged - Interested - Green
+                if (cat.includes('engaged') && cat.includes('interested')) return '#10b981';
+
+                // Hot Lead - Meeting Scheduled - Blue
+                if (cat.includes('hot lead') || cat.includes('meeting scheduled')) return '#3b82f6';
+
+                // No Action Needed - Purple
+                if (cat.includes('no action')) return '#8b5cf6';
+
+                // Follow-Up Needed - Beige
+                if (cat.includes('follow') || cat.includes('follow-up')) return '#d4a574';
+
+                // Pipelined / Circle Back - Cyan (light blue)
+                if (cat.includes('pipeline') || cat.includes('circle back')) return '#06b6d4';
+
+                // Invalid / Wrong Contact - Dark Gray
+                if (cat.includes('invalid') || cat.includes('wrong contact')) return '#4b5563';
+
+                // Sold - Gold (maximum achievement)
+                if (cat.includes('sold')) return '#fbbf24';
+
+                // Existing Client - Pink
+                if (cat.includes('existing client')) return '#ec4899';
+
+                // Default color for unknown categories
+                return '#94a3b8';
+            }};
+
+            // Generate colors array based on actual categories
+            const categoryLabels = Object.keys(categories);
+            const categoryColors = categoryLabels.map(cat => getCategoryColor(cat));
+
+            charts.replyCategories = new Chart(ctx, {{
+                type: 'doughnut',
+                data: {{
+                    labels: categoryLabels,
+                    datasets: [{{
+                        data: Object.values(categories),
+                        backgroundColor: categoryColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {{
+                        legend: {{
+                            position: 'right',
+                            labels: {{
+                                padding: 12,
+                                font: {{
+                                    size: 11
+                                }},
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }}
+                        }},
+                        tooltip: {{
+                            callbacks: {{
+                                label: function(context) {{
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `  ${{label}}: ${{value}} (${{percentage}}%)`;
+                                }}
+                            }}
+                        }}
+                    }}
+                }}
+            }});
+        }}
+
+        // Top Campaigns Chart
+        function renderTopCampaignsChart(data) {{
+            const ctx = document.getElementById('topCampaignsChart');
+            if (charts.topCampaigns) charts.topCampaigns.destroy();
+
+            const sorted = [...data].sort((a, b) => (b['Open Rate %'] || 0) - (a['Open Rate %'] || 0)).slice(0, 5);
+            const labels = sorted.map(c => c.Industry.substring(0, 20) + (c.Industry.length > 20 ? '...' : ''));
+            const rates = sorted.map(c => ((c['Open Rate %'] || 0) * 100).toFixed(1));
+
+            charts.topCampaigns = new Chart(ctx, {{
+                type: 'bar',
+                data: {{
+                    labels: labels,
+                    datasets: [{{
+                        label: 'Open Rate %',
+                        data: rates,
+                        backgroundColor: chartColors.success
+                    }}]
+                }},
+                options: {{
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false
+                }}
+            }});
+        }}
+
+        // Replies Timeline Chart
+        function renderRepliesTimelineChart() {{
+            const ctx = document.getElementById('repliesTimelineChart');
+            if (charts.repliesTimeline) charts.repliesTimeline.destroy();
+
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const filteredData = getFilteredData();
+
+            const filteredReplies = window.repliesData.filter(r => {{
+                // Use flexible campaign matching
+                const matchesCampaign = filteredData.some(campaign =>
+                    replyMatchesCampaign(r['Email Campaign'], campaign.Industry)
+                );
+
+                if (!matchesCampaign) return false;
+                if (startDate && r.Date < startDate) return false;
+                if (endDate && r.Date > endDate) return false;
+                return true;
+            }});
+
+            const dateGroups = {{}};
+            filteredReplies.forEach(r => {{
+                let dateStr = r.Date;
+                if (dateStr && dateStr.includes(' ')) {{
+                    dateStr = dateStr.split(' ')[0];
+                }}
+                if (dateStr) {{
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3 && parts[0].length === 2) {{
+                        dateStr = `2026-${{parts[1]}}-${{parts[0]}}`;
+                    }}
+                    dateGroups[dateStr] = (dateGroups[dateStr] || 0) + 1;
+                }}
+            }});
+
+            const sortedDates = Object.keys(dateGroups).sort();
+            const counts = sortedDates.map(d => dateGroups[d]);
+            const labels = sortedDates.map(d => new Date(d).toLocaleDateString());
+
+            charts.repliesTimeline = new Chart(ctx, {{
+                type: 'line',
+                data: {{
+                    labels: labels,
+                    datasets: [{{
+                        label: 'Replies per Day',
+                        data: counts,
+                        borderColor: chartColors.info,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {{
+                        x: {{ ticks: {{ maxRotation: 45, minRotation: 45 }} }}
+                    }}
+                }}
+            }});
+        }}
+    </script>
+</body>
+</html>'''
+
+    return html
+
 def main():
     print("=" * 80)
     print("ACTUALIZANDO TODOS LOS DASHBOARDS Y REPLIES")
@@ -1424,8 +2815,11 @@ def main():
                     f.write(replies_html)
                 print(f"  CREADO: {replies_filename}")
 
-        # Generar HTML del dashboard
-        html_content = generate_dashboard_html(company_name, company_data, data_records, len(replies_data))
+        # Generar HTML del dashboard (usar versión mejorada para TeamFicient)
+        if company_name == 'TeamFicient':
+            html_content = generate_improved_dashboard_teamficient(company_name, company_data, data_records, replies_data)
+        else:
+            html_content = generate_dashboard_html(company_name, company_data, data_records, len(replies_data))
 
         # Guardar archivo
         filename = f"dashboard_{company_name.lower().replace(' ', '')}.html"

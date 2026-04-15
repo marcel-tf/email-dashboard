@@ -104,20 +104,45 @@
             border-left: 5px solid;
         }
 
-        .stat-item.negative {
-            border-left-color: #EF4444;
+        .stat-item.not-interested {
+            border-left-color: #9ca3af;
         }
 
-        .stat-item.interested {
-            border-left-color: #3B82F6;
+        .stat-item.engaged-interested {
+            border-left-color: #10b981;
         }
 
         .stat-item.hot-lead {
-            border-left-color: #10B981;
+            border-left-color: #3b82f6;
+        }
+
+        .stat-item.no-action {
+            border-left-color: #8b5cf6;
+        }
+
+        .stat-item.follow-up {
+            border-left-color: #d4a574;
+        }
+
+        .stat-item.pipelined {
+            border-left-color: #06b6d4;
+        }
+
+        .stat-item.invalid {
+            border-left-color: #4b5563;
+        }
+
+        .stat-item.sold {
+            border-left-color: #fbbf24;
+            background: linear-gradient(to right, rgba(251, 191, 36, 0.05), white);
+        }
+
+        .stat-item.existing-client {
+            border-left-color: #ec4899;
         }
 
         .stat-item.neutral {
-            border-left-color: #8B5CF6;
+            border-left-color: #94a3b8;
         }
 
         .stat-label {
@@ -210,43 +235,80 @@
             letter-spacing: 0.5px;
         }
 
-        .response-category.negative {
-            background: #EF4444;
+        /* Updated category colors */
+        .response-category.not-interested {
+            background: #9ca3af;
             color: white;
         }
 
-        .response-category.interested {
-            background: #3B82F6;
+        .response-category.engaged-interested {
+            background: #10b981;
             color: white;
         }
 
         .response-category.hot-lead {
-            background: #10B981;
+            background: #3b82f6;
             color: white;
         }
 
-        .response-category.neutral {
-            background: #8B5CF6;
+        .response-category.no-action {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .response-category.follow-up {
+            background: #d4a574;
+            color: white;
+        }
+
+        .response-category.pipelined {
+            background: #06b6d4;
+            color: white;
+        }
+
+        .response-category.invalid {
+            background: #4b5563;
             color: white;
         }
 
         .response-category.sold {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #000;
             font-weight: 700;
             font-size: 13px;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
             animation: pulse-sold 2s ease-in-out infinite;
         }
 
         @keyframes pulse-sold {
-            0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5); }
-            50% { box-shadow: 0 4px 25px rgba(255, 215, 0, 0.8); }
+            0%, 100% { box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5); }
+            50% { box-shadow: 0 4px 25px rgba(251, 191, 36, 0.8); }
         }
 
-        .response-category.follow-up {
-            background: #F59E0B;
+        .response-category.existing-client {
+            background: #ec4899;
             color: white;
+        }
+
+        .response-category.neutral {
+            background: #94a3b8;
+            color: white;
+        }
+
+        .response-date {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .date-icon {
+            margin-right: 5px;
         }
 
         .response-details {
@@ -277,6 +339,66 @@
             line-height: 1.6;
             color: #2c3e50;
             font-style: italic;
+        }
+
+        .filters-container {
+            margin-bottom: 25px;
+        }
+
+        .date-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .date-filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .clear-dates-btn {
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-end;
+        }
+
+        .clear-dates-btn:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
         }
 
         .filter-buttons {
@@ -310,41 +432,61 @@
             border-color: #2c3e50;
         }
 
-        .filter-btn.negative.active {
-            background: #EF4444;
-            border-color: #EF4444;
+        .filter-btn.not-interested.active {
+            background: #9ca3af;
+            border-color: #9ca3af;
         }
 
-        .filter-btn.interested.active {
-            background: #3B82F6;
-            border-color: #3B82F6;
+        .filter-btn.engaged-interested.active {
+            background: #10b981;
+            border-color: #10b981;
         }
 
         .filter-btn.hot-lead.active {
-            background: #10B981;
-            border-color: #10B981;
+            background: #3b82f6;
+            border-color: #3b82f6;
         }
 
-        .filter-btn.neutral.active {
-            background: #8B5CF6;
-            border-color: #8B5CF6;
+        .filter-btn.no-action.active {
+            background: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+
+        .filter-btn.follow-up.active {
+            background: #d4a574;
+            border-color: #d4a574;
+        }
+
+        .filter-btn.pipelined.active {
+            background: #06b6d4;
+            border-color: #06b6d4;
+        }
+
+        .filter-btn.invalid.active {
+            background: #4b5563;
+            border-color: #4b5563;
         }
 
         .filter-btn.sold {
-            border: 3px solid #FFD700;
+            border: 3px solid #fbbf24;
             font-weight: 700;
         }
 
         .filter-btn.sold.active {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            border-color: #FFD700;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #fbbf24;
             color: #000;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
         }
 
-        .filter-btn.follow-up.active {
-            background: #F59E0B;
-            border-color: #F59E0B;
+        .filter-btn.existing-client.active {
+            background: #ec4899;
+            border-color: #ec4899;
+        }
+
+        .filter-btn.neutral.active {
+            background: #94a3b8;
+            border-color: #94a3b8;
         }
 
         @media (max-width: 768px) {
@@ -386,7 +528,7 @@
                         <div class="stat-item sold">
                             <div class="stat-label">Sold</div>
                             <div class="stat-value">1 <span class="stat-percentage">(7%)</span></div>
-                        </div><div class="stat-item interested">
+                        </div><div class="stat-item engaged-interested">
                             <div class="stat-label">Engaged – Interested</div>
                             <div class="stat-value">1 <span class="stat-percentage">(7%)</span></div>
                         </div><div class="stat-item follow-up">
@@ -395,10 +537,10 @@
                         </div><div class="stat-item hot-lead">
                             <div class="stat-label">Hot Lead – Meeting Scheduled</div>
                             <div class="stat-value">4 <span class="stat-percentage">(29%)</span></div>
-                        </div><div class="stat-item neutral">
+                        </div><div class="stat-item no-action">
                             <div class="stat-label">No Action Needed</div>
                             <div class="stat-value">3 <span class="stat-percentage">(21%)</span></div>
-                        </div><div class="stat-item negative">
+                        </div><div class="stat-item not-interested">
                             <div class="stat-label">Not Interested</div>
                             <div class="stat-value">3 <span class="stat-percentage">(21%)</span></div>
                         </div>
@@ -409,20 +551,37 @@
             <div class="responses-section">
                 <h2>All Responses (14)</h2>
 
-                <div class="filter-buttons">
-                    <button class="filter-btn all active" onclick="filterResponses('all')">All (14)</button>
-                    <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn interested" onclick="filterResponses('interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn neutral" onclick="filterResponses('neutral')">No Action Needed (3)</button><button class="filter-btn negative" onclick="filterResponses('negative')">Not Interested (3)</button>
+                <div class="filters-container">
+                    <div class="date-filters">
+                        <div class="date-filter-group">
+                            <label for="startDate">From Date</label>
+                            <input type="date" id="startDate" class="date-input" onchange="applyFilters()">
+                        </div>
+                        <div class="date-filter-group">
+                            <label for="endDate">To Date</label>
+                            <input type="date" id="endDate" class="date-input" onchange="applyFilters()">
+                        </div>
+                        <button class="clear-dates-btn" onclick="clearDateFilters()">Clear Dates</button>
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button class="filter-btn all active" onclick="filterResponses('all')">All (14)</button>
+                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (3)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (3)</button>
+                    </div>
                 </div>
 
                 <div id="responsesContainer">
                     
-        <div class="response-card negative" data-category="negative">
+        <div class="response-card not-interested" data-category="not-interested" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Georgina</div>
                     <div class="response-email">georgina@rakentrepreneurs.ae</div>
                 </div>
-                <div class="response-category negative">Not Interested</div>
+                <div class="response-category not-interested">Not Interested</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -441,13 +600,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card neutral" data-category="neutral">
+        <div class="response-card no-action" data-category="no-action" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Aleksejs Belakovs</div>
                     <div class="response-email">alex@digitaltide.io</div>
                 </div>
-                <div class="response-category neutral">No Action Needed</div>
+                <div class="response-category no-action">No Action Needed</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -466,13 +628,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card follow-up" data-category="follow-up">
+        <div class="response-card follow-up" data-category="follow-up" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Darshap Nayak</div>
                     <div class="response-email">darshap.nayak@aphelioncyber.com</div>
                 </div>
                 <div class="response-category follow-up">Follow-Up Needed</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -491,13 +656,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card sold" data-category="sold">
+        <div class="response-card sold" data-category="sold" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Yadhu Krishnan</div>
                     <div class="response-email">yadhu@aurosecurity.com</div>
                 </div>
                 <div class="response-category sold">Sold</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -516,13 +684,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card neutral" data-category="neutral">
+        <div class="response-card no-action" data-category="no-action" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Kamar Khateeb</div>
                     <div class="response-email">kamarkhateeb@codentia.org</div>
                 </div>
-                <div class="response-category neutral">No Action Needed</div>
+                <div class="response-category no-action">No Action Needed</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -541,13 +712,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card negative" data-category="negative">
+        <div class="response-card not-interested" data-category="not-interested" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Tarek Al Jamain</div>
                     <div class="response-email">tjamain@care.med.sa</div>
                 </div>
-                <div class="response-category negative">Not Interested</div>
+                <div class="response-category not-interested">Not Interested</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -566,13 +740,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card interested" data-category="interested">
+        <div class="response-card engaged-interested" data-category="engaged-interested" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">shoeb@shazebict.com</div>
                     <div class="response-email">shoeb@shazebict.com</div>
                 </div>
-                <div class="response-category interested">Engaged – Interested</div>
+                <div class="response-category engaged-interested">Engaged – Interested</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -591,13 +768,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card hot-lead" data-category="hot-lead">
+        <div class="response-card hot-lead" data-category="hot-lead" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Kamal Ahmed</div>
                     <div class="response-email">kamal@brinztech.com</div>
                 </div>
                 <div class="response-category hot-lead">Hot Lead – Meeting Scheduled</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -616,13 +796,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card follow-up" data-category="follow-up">
+        <div class="response-card follow-up" data-category="follow-up" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Mark Rothwell-Brooks</div>
                     <div class="response-email">mark@verityx.co</div>
                 </div>
                 <div class="response-category follow-up">Follow-Up Needed</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -641,13 +824,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card hot-lead" data-category="hot-lead">
+        <div class="response-card hot-lead" data-category="hot-lead" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Steve Carter</div>
                     <div class="response-email">infosec4tc.com</div>
                 </div>
                 <div class="response-category hot-lead">Hot Lead – Meeting Scheduled</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -666,13 +852,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card neutral" data-category="neutral">
+        <div class="response-card no-action" data-category="no-action" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Kosay Tabaja</div>
                     <div class="response-email">kosay.tabaja@cyninges.com</div>
                 </div>
-                <div class="response-category neutral">No Action Needed</div>
+                <div class="response-category no-action">No Action Needed</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -691,13 +880,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card hot-lead" data-category="hot-lead">
+        <div class="response-card hot-lead" data-category="hot-lead" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Kamal</div>
                     <div class="response-email">kamal@brinztech.com</div>
                 </div>
                 <div class="response-category hot-lead">Hot Lead – Meeting Scheduled</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -716,13 +908,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card negative" data-category="negative">
+        <div class="response-card not-interested" data-category="not-interested" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Kosay Tojaba</div>
                     <div class="response-email">kosay.tabaja@cyninges.com</div>
                 </div>
-                <div class="response-category negative">Not Interested</div>
+                <div class="response-category not-interested">Not Interested</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -741,13 +936,16 @@
             <div class="response-message">""</div>
         </div>
         
-        <div class="response-card hot-lead" data-category="hot-lead">
+        <div class="response-card hot-lead" data-category="hot-lead" data-date="1900-01-01">
             <div class="response-header">
                 <div>
                     <div class="response-who">Adil Rahat</div>
                     <div class="response-email">adilrahat@verisafe.ae</div>
                 </div>
                 <div class="response-category hot-lead">Hot Lead – Meeting Scheduled</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
             </div>
             <div class="response-details">
                 <div class="response-detail-item">
@@ -772,7 +970,7 @@
     </div>
 
     <script>
-        // Create response distribution chart with REAL categories
+        // Create response distribution chart with REAL categories (same style as dashboard)
         const ctx = document.getElementById('responseChart');
         new Chart(ctx, {
             type: 'doughnut',
@@ -781,9 +979,10 @@
                 datasets: [{
                     data: [1,1,2,4,3,3],
                     backgroundColor: [
-                        '#FFD700','#3B82F6','#F59E0B','#10B981','#8B5CF6','#EF4444'
+                        '#fbbf24','#10b981','#d4a574','#3b82f6','#8b5cf6','#9ca3af'
                     ],
-                    borderWidth: 0
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
                 }]
             },
             options: {
@@ -791,12 +990,14 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom',
+                        position: 'right',
                         labels: {
-                            padding: 20,
+                            padding: 12,
                             font: {
-                                size: 13
-                            }
+                                size: 11
+                            },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
                         }
                     },
                     tooltip: {
@@ -806,7 +1007,7 @@
                                 const value = context.parsed || 0;
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return label + ': ' + value + ' (' + percentage + '%)';
+                                return '  ' + label + ': ' + value + ' (' + percentage + '%)';
                             }
                         }
                     }
@@ -814,27 +1015,67 @@
             }
         });
 
-        // Filter responses
+        // State for filters
+        let currentCategory = 'all';
+
+        // Filter responses by category
         function filterResponses(category) {
-            const cards = document.querySelectorAll('.response-card');
+            currentCategory = category;
             const buttons = document.querySelectorAll('.filter-btn');
 
             // Update button states
             buttons.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // Filter cards
+            applyFilters();
+        }
+
+        // Apply all filters (category + date)
+        function applyFilters() {
+            const cards = document.querySelectorAll('.response-card');
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
             cards.forEach(card => {
-                if (category === 'all') {
-                    card.style.display = 'block';
-                } else {
-                    if (card.dataset.category === category) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
+                let show = true;
+
+                // Category filter
+                if (currentCategory !== 'all') {
+                    if (card.dataset.category !== currentCategory) {
+                        show = false;
                     }
                 }
+
+                // Date filter
+                if (show && (startDate || endDate)) {
+                    const cardDate = card.dataset.date;
+                    if (startDate && cardDate < startDate) {
+                        show = false;
+                    }
+                    if (endDate && cardDate > endDate) {
+                        show = false;
+                    }
+                }
+
+                card.style.display = show ? 'block' : 'none';
             });
+
+            // Update count in "All" button
+            const visibleCards = document.querySelectorAll('.response-card[style="display: block;"]').length;
+            const allButton = document.querySelector('.filter-btn.all');
+            if (allButton) {
+                const totalMatch = allButton.textContent.match(/\d+/);
+                if (totalMatch) {
+                    allButton.textContent = `All (${visibleCards})`;
+                }
+            }
+        }
+
+        // Clear date filters
+        function clearDateFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            applyFilters();
         }
     </script>
 </body>
