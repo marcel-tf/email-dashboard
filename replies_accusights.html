@@ -533,23 +533,23 @@
                             <div class="stat-value">1 <span class="stat-percentage">(7%)</span></div>
                         </div><div class="stat-item follow-up">
                             <div class="stat-label">Follow-Up Needed</div>
-                            <div class="stat-value">2 <span class="stat-percentage">(14%)</span></div>
+                            <div class="stat-value">2 <span class="stat-percentage">(13%)</span></div>
                         </div><div class="stat-item hot-lead">
                             <div class="stat-label">Hot Lead – Meeting Scheduled</div>
-                            <div class="stat-value">4 <span class="stat-percentage">(29%)</span></div>
+                            <div class="stat-value">4 <span class="stat-percentage">(27%)</span></div>
                         </div><div class="stat-item no-action">
                             <div class="stat-label">No Action Needed</div>
-                            <div class="stat-value">3 <span class="stat-percentage">(21%)</span></div>
+                            <div class="stat-value">3 <span class="stat-percentage">(20%)</span></div>
                         </div><div class="stat-item not-interested">
                             <div class="stat-label">Not Interested</div>
-                            <div class="stat-value">3 <span class="stat-percentage">(21%)</span></div>
+                            <div class="stat-value">4 <span class="stat-percentage">(27%)</span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="responses-section">
-                <h2>All Responses (14)</h2>
+                <h2>All Responses (15)</h2>
 
                 <div class="filters-container">
                     <div class="date-filters">
@@ -565,8 +565,8 @@
                     </div>
 
                     <div class="filter-buttons">
-                        <button class="filter-btn all active" onclick="filterResponses('all')">All (14)</button>
-                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (3)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (3)</button>
+                        <button class="filter-btn all active" onclick="filterResponses('all')">All (15)</button>
+                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (3)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (4)</button>
                     </div>
                 </div>
 
@@ -964,6 +964,34 @@
             <div class="response-message">""</div>
         </div>
         
+        <div class="response-card not-interested" data-category="not-interested" data-date="1900-01-01">
+            <div class="response-header">
+                <div>
+                    <div class="response-who">Unknown</div>
+                    <div class="response-email">office@sederorthodontics.com</div>
+                </div>
+                <div class="response-category not-interested">Not Interested</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
+            </div>
+            <div class="response-details">
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Subject:</span>
+                    <span class="response-detail-value">RE: Quick follow-up</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Campaign:</span>
+                    <span class="response-detail-value"></span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Action Taken:</span>
+                    <span class="response-detail-value"></span>
+                </div>
+            </div>
+            <div class="response-message">""</div>
+        </div>
+        
                 </div>
             </div>
         </div>
@@ -977,7 +1005,7 @@
             data: {
                 labels: ['Sold','Engaged – Interested','Follow-Up Needed','Hot Lead – Meeting Scheduled','No Action Needed','Not Interested'],
                 datasets: [{
-                    data: [1,1,2,4,3,3],
+                    data: [1,1,2,4,3,4],
                     backgroundColor: [
                         '#fbbf24','#10b981','#d4a574','#3b82f6','#8b5cf6','#9ca3af'
                     ],
