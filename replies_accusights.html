@@ -527,29 +527,32 @@
                     <div class="stats-grid">
                         <div class="stat-item sold">
                             <div class="stat-label">Sold</div>
-                            <div class="stat-value">1 <span class="stat-percentage">(7%)</span></div>
+                            <div class="stat-value">1 <span class="stat-percentage">(6%)</span></div>
+                        </div><div class="stat-item pipelined">
+                            <div class="stat-label">Circle Back</div>
+                            <div class="stat-value">1 <span class="stat-percentage">(6%)</span></div>
                         </div><div class="stat-item engaged-interested">
                             <div class="stat-label">Engaged – Interested</div>
-                            <div class="stat-value">1 <span class="stat-percentage">(7%)</span></div>
+                            <div class="stat-value">1 <span class="stat-percentage">(6%)</span></div>
                         </div><div class="stat-item follow-up">
                             <div class="stat-label">Follow-Up Needed</div>
-                            <div class="stat-value">2 <span class="stat-percentage">(13%)</span></div>
+                            <div class="stat-value">2 <span class="stat-percentage">(12%)</span></div>
                         </div><div class="stat-item hot-lead">
                             <div class="stat-label">Hot Lead – Meeting Scheduled</div>
-                            <div class="stat-value">4 <span class="stat-percentage">(27%)</span></div>
+                            <div class="stat-value">4 <span class="stat-percentage">(25%)</span></div>
                         </div><div class="stat-item no-action">
                             <div class="stat-label">No Action Needed</div>
-                            <div class="stat-value">3 <span class="stat-percentage">(20%)</span></div>
+                            <div class="stat-value">3 <span class="stat-percentage">(19%)</span></div>
                         </div><div class="stat-item not-interested">
                             <div class="stat-label">Not Interested</div>
-                            <div class="stat-value">4 <span class="stat-percentage">(27%)</span></div>
+                            <div class="stat-value">4 <span class="stat-percentage">(25%)</span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="responses-section">
-                <h2>All Responses (15)</h2>
+                <h2>All Responses (16)</h2>
 
                 <div class="filters-container">
                     <div class="date-filters">
@@ -565,8 +568,8 @@
                     </div>
 
                     <div class="filter-buttons">
-                        <button class="filter-btn all active" onclick="filterResponses('all')">All (15)</button>
-                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (3)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (4)</button>
+                        <button class="filter-btn all active" onclick="filterResponses('all')">All (16)</button>
+                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn pipelined" onclick="filterResponses('pipelined')">Circle Back (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (3)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (4)</button>
                     </div>
                 </div>
 
@@ -992,6 +995,34 @@
             <div class="response-message">""</div>
         </div>
         
+        <div class="response-card pipelined" data-category="pipelined" data-date="1900-01-01">
+            <div class="response-header">
+                <div>
+                    <div class="response-who">Aleksei Koshelev</div>
+                    <div class="response-email">support@yango.com</div>
+                </div>
+                <div class="response-category pipelined">Circle Back</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> Unknown
+            </div>
+            <div class="response-details">
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Subject:</span>
+                    <span class="response-detail-value">Re: Turn compliance into your highest-retention MSP service</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Campaign:</span>
+                    <span class="response-detail-value"></span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Action Taken:</span>
+                    <span class="response-detail-value">Sent him an email to let his team have a meeting with us so they can understand better where they need help</span>
+                </div>
+            </div>
+            <div class="response-message">""</div>
+        </div>
+        
                 </div>
             </div>
         </div>
@@ -1003,11 +1034,11 @@
         new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Sold','Engaged – Interested','Follow-Up Needed','Hot Lead – Meeting Scheduled','No Action Needed','Not Interested'],
+                labels: ['Sold','Circle Back','Engaged – Interested','Follow-Up Needed','Hot Lead – Meeting Scheduled','No Action Needed','Not Interested'],
                 datasets: [{
-                    data: [1,1,2,4,3,4],
+                    data: [1,1,1,2,4,3,4],
                     backgroundColor: [
-                        '#fbbf24','#10b981','#d4a574','#3b82f6','#8b5cf6','#9ca3af'
+                        '#fbbf24','#06b6d4','#10b981','#d4a574','#3b82f6','#8b5cf6','#9ca3af'
                     ],
                     borderWidth: 2,
                     borderColor: '#ffffff'

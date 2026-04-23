@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArchFicient - Email Campaign Dashboard</title>
+    <title>TeamFicient - Email Campaign Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #003B5C 0%, #001F3F 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             padding: 20px;
             min-height: 100vh;
         }
@@ -29,7 +29,7 @@
         }
 
         header {
-            background: linear-gradient(135deg, #2D2926 0%, #1a1918 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             padding: 30px 40px;
             display: flex;
@@ -58,7 +58,7 @@
 
         .back-btn:hover {
             background: white;
-            color: #003B5C;
+            color: #3B82F6;
         }
 
         .filters-section {
@@ -99,7 +99,7 @@
 
         .filter-group select:focus {
             outline: none;
-            border-color: #003B5C;
+            border-color: #3B82F6;
         }
 
         .filter-group .date-input {
@@ -115,12 +115,12 @@
 
         .filter-group .date-input:focus {
             outline: none;
-            border-color: #003B5C;
+            border-color: #3B82F6;
         }
 
         .clear-filters-btn {
             padding: 10px 25px;
-            background: linear-gradient(135deg, #003B5C 0%, #001F3F 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -168,7 +168,7 @@
         }
 
         .kpi-card.primary {
-            background: linear-gradient(135deg, #003B5C 0%, #001F3F 100%);
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
             color: white;
         }
 
@@ -257,7 +257,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>ArchFicient - Campaign Dashboard</h1>
+            <h1>TeamFicient - Campaign Dashboard</h1>
             <a href="index.html" class="back-btn">← Back to Companies</a>
         </header>
 
@@ -300,10 +300,10 @@
                 </div>
 
                 
-                <div class="kpi-card info">
+                <div class="kpi-card info clickable" onclick="window.location.href='replies_teamficient.html'">
                     <div class="kpi-label">Total Replied</div>
-                    <div class="kpi-value">0</div>
-                    <div class="kpi-subtitle">No responses yet</div>
+                    <div class="kpi-value">41</div>
+                    <div class="kpi-subtitle">Customer responses (Click for details)</div>
                 </div>
         
             </div>
@@ -334,263 +334,360 @@
     </div>
 
     <script>
-        // Data embedded from Excel - Last updated: 2026-04-23 14:59
+        // Data embedded from Excel - Last updated: 2026-04-14 12:14
         // IMPORTANTE: Solo campañas con Status='Sent'
         const allData = [
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Job Hirings - Interior Designers",
-                        "Leads Generated": 141.0,
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads Driving School",
+                        "Leads Generated": 49.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-17",
-                        "Date Sent": "2026-03-17",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-02-24",
+                        "Date Sent": "2026-02-24",
+                        "Email Content Used": "Driving",
                         "CRM Status": "Sent",
-                        "Clicked": 4.0,
-                        "Opened": 39.0,
+                        "Clicked": 0.0,
+                        "Opened": 17.0,
                         "Replied": 0.0,
-                        "Delivered": 132.0,
-                        "Open Rate %": 0.2765957447
+                        "Delivered": 43.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.3953488372
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Job Hirings - Engineers",
-                        "Leads Generated": 168.0,
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads General",
+                        "Leads Generated": 71.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-19",
-                        "Date Sent": "2026-03-19",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-02-24",
+                        "Date Sent": "2026-02-24",
+                        "Email Content Used": "General",
                         "CRM Status": "Sent",
                         "Clicked": 2.0,
-                        "Opened": 28.0,
+                        "Opened": 45.0,
+                        "Replied": 6.0,
+                        "Delivered": 71.0,
+                        "Replied 2": 6.0,
+                        "Open Rate %": 0.6338028169
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads Healthcare",
+                        "Leads Generated": 9.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-02-24",
+                        "Date Sent": "2026-02-24",
+                        "Email Content Used": "Healthcare",
+                        "CRM Status": "Sent",
+                        "Clicked": 0.0,
+                        "Opened": 1.0,
                         "Replied": 0.0,
-                        "Delivered": 147.0,
+                        "Delivered": 8.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.125
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads Driving School",
+                        "Leads Generated": 6.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-02-25",
+                        "Date Sent": "2026-02-25",
+                        "Email Content Used": "Driving",
+                        "CRM Status": "Sent",
+                        "Clicked": 0.0,
+                        "Opened": 1.0,
+                        "Replied": 0.0,
+                        "Delivered": 6.0,
+                        "Replied 2": 0.0,
                         "Open Rate %": 0.1666666667
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Job Hirings - Engineers",
-                        "Leads Generated": 127.0,
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads General",
+                        "Leads Generated": 19.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-20",
-                        "Date Sent": "2026-03-20",
-                        "Email Content Used": "Archficient Email Content",
-                        "CRM Status": "Sent",
-                        "Clicked": 2.0,
-                        "Opened": 18.0,
-                        "Replied": 0.0,
-                        "Delivered": 103.0,
-                        "Open Rate %": 0.1417322835
-            },
-            {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Job Hirings - Architects",
-                        "Leads Generated": 194.0,
-                        "Status": "Sent",
-                        "Import Schedule": "2026-03-26",
-                        "Date Sent": "2026-03-26",
-                        "Email Content Used": "Archficient Email Content",
-                        "CRM Status": "Sent",
-                        "Clicked": 4.0,
-                        "Opened": 24.0,
-                        "Replied": 0.0,
-                        "Delivered": 181.0,
-                        "Open Rate %": 0.1237113402
-            },
-            {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "AIA Directory - Architects",
-                        "Leads Generated": 81.0,
-                        "Status": "Sent",
-                        "Import Schedule": "2026-03-27",
-                        "Date Sent": "2026-03-27",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-02-25",
+                        "Date Sent": "2026-02-25",
+                        "Email Content Used": "General",
                         "CRM Status": "Sent",
                         "Clicked": 3.0,
-                        "Opened": 16.0,
+                        "Opened": 12.0,
                         "Replied": 0.0,
-                        "Delivered": 73.0,
-                        "Open Rate %": 0.1975308642
+                        "Delivered": 18.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.6666666667
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Archeter - Interior Designers",
-                        "Leads Generated": 53.0,
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads Healthcare",
+                        "Leads Generated": 3.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-27",
-                        "Date Sent": "2026-03-27",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-02-25",
+                        "Date Sent": "2026-02-25",
+                        "Email Content Used": "Healthcare",
                         "CRM Status": "Sent",
                         "Clicked": 0.0,
-                        "Opened": 2.0,
+                        "Opened": 1.0,
                         "Replied": 0.0,
-                        "Delivered": 34.0,
-                        "Open Rate %": 0.03773584906
+                        "Delivered": 3.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.3333333333
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chairish - Interior Designers",
-                        "Leads Generated": 175.0,
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads Driving School",
+                        "Leads Generated": 81.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-27",
-                        "Date Sent": "2026-03-27",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-02-27",
+                        "Date Sent": "2026-02-27",
+                        "Email Content Used": "Driving",
                         "CRM Status": "Sent",
-                        "Clicked": 5.0,
-                        "Opened": 27.0,
-                        "Replied": 0.0,
-                        "Delivered": 162.0,
-                        "Open Rate %": 0.1542857143
+                        "Clicked": 0.0,
+                        "Opened": 28.0,
+                        "Replied": 2.0,
+                        "Delivered": 81.0,
+                        "Replied 2": 2.0,
+                        "Open Rate %": 0.3456790123
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (1)",
-                        "Leads Generated": 928.0,
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads General",
+                        "Leads Generated": 211.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-30",
-                        "Date Sent": "2026-03-30",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-02-27",
+                        "Date Sent": "2026-02-27",
+                        "Email Content Used": "General",
                         "CRM Status": "Sent",
-                        "Clicked": 9.0,
-                        "Opened": 100.0,
-                        "Replied": 0.0,
-                        "Delivered": 862.0,
-                        "Open Rate %": 0.1077586207
+                        "Clicked": 6.0,
+                        "Opened": 107.0,
+                        "Replied": 2.0,
+                        "Delivered": 211.0,
+                        "Replied 2": 2.0,
+                        "Open Rate %": 0.5071090047
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (2)",
-                        "Leads Generated": 397.0,
+                        "Company": "TeamFicient",
+                        "Industry": "TF Past Leads Healthcare",
+                        "Leads Generated": 29.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-30",
-                        "Date Sent": "2026-03-30",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-02-27",
+                        "Date Sent": "2026-02-27",
+                        "Email Content Used": "Healthcare",
                         "CRM Status": "Sent",
-                        "Clicked": 7.0,
-                        "Opened": 61.0,
+                        "Clicked": 2.0,
+                        "Opened": 13.0,
                         "Replied": 0.0,
-                        "Delivered": 374.0,
-                        "Open Rate %": 0.1536523929
+                        "Delivered": 29.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.4482758621
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (3)",
-                        "Leads Generated": 403.0,
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Driving School",
+                        "Leads Generated": 153.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-03-31",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-03-11",
+                        "Email Content Used": "Driving School",
+                        "CRM Status": "Sent",
+                        "Clicked": 28.0,
+                        "Opened": 207.0,
+                        "Replied": 4.0,
+                        "Delivered": 391.0,
+                        "Replied 2": 4.0,
+                        "Open Rate %": 0.5294117647
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads General",
+                        "Leads Generated": 200.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-03-17",
+                        "Email Content Used": "General Services",
+                        "CRM Status": "Sent",
+                        "Clicked": 68.0,
+                        "Opened": 113.0,
+                        "Replied": 4.0,
+                        "Delivered": 173.0,
+                        "Replied 2": 4.0,
+                        "Open Rate %": 0.6531791908
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads General",
+                        "Leads Generated": 200.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-03-18",
+                        "Email Content Used": "General Services",
+                        "CRM Status": "Sent",
+                        "Clicked": 19.0,
+                        "Opened": 63.0,
+                        "Replied": 4.0,
+                        "Delivered": 168.0,
+                        "Replied 2": 4.0,
+                        "Open Rate %": 0.375
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Financial",
+                        "Leads Generated": 99.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-03-20",
+                        "Email Content Used": "Financial Services",
+                        "CRM Status": "Sent",
+                        "Clicked": 67.0,
+                        "Opened": 114.0,
+                        "Replied": 0.0,
+                        "Delivered": 243.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.4691358025
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Legal",
+                        "Leads Generated": 104.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-03-20",
+                        "Email Content Used": "Legal",
+                        "CRM Status": "Sent",
+                        "Clicked": 75.0,
+                        "Opened": 153.0,
+                        "Replied": 1.0,
+                        "Delivered": 331.0,
+                        "Replied 2": 1.0,
+                        "Open Rate %": 0.4622356495
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Marketing",
+                        "Leads Generated": 300.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-03-25",
+                        "Email Content Used": "Marketing",
+                        "CRM Status": "Sent",
+                        "Clicked": 37.0,
+                        "Opened": 102.0,
+                        "Replied": 2.0,
+                        "Delivered": 279.0,
+                        "Replied 2": 2.0,
+                        "Open Rate %": 0.3655913978
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads IT Services",
+                        "Leads Generated": 443.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-03-26",
+                        "Email Content Used": "IT Services",
+                        "CRM Status": "Sent",
+                        "Clicked": 188.0,
+                        "Opened": 312.0,
+                        "Replied": 3.0,
+                        "Delivered": 795.0,
+                        "Replied 2": 3.0,
+                        "Open Rate %": 0.3924528302
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Marketing",
+                        "Leads Generated": 298.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
                         "Date Sent": "2026-03-31",
-                        "Email Content Used": "Archficient Email Content",
+                        "Email Content Used": "Marketing",
                         "CRM Status": "Sent",
-                        "Clicked": 5.0,
-                        "Opened": 58.0,
-                        "Replied": 0.0,
-                        "Delivered": 368.0,
-                        "Open Rate %": 0.1439205955
+                        "Clicked": 15.0,
+                        "Opened": 77.0,
+                        "Replied": 3.0,
+                        "Delivered": 279.0,
+                        "Replied 2": 3.0,
+                        "Open Rate %": 0.2759856631
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (4)",
-                        "Leads Generated": 404.0,
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Real Estate",
+                        "Leads Generated": 300.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-03-05",
+                        "Date Sent": "2026-04-01",
+                        "Email Content Used": "Real Estate",
+                        "CRM Status": "Sent",
+                        "Clicked": 3.0,
+                        "Opened": 39.0,
+                        "Replied": 2.0,
+                        "Delivered": 284.0,
+                        "Replied 2": 2.0,
+                        "Open Rate %": 0.1373239437
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "DSAA Members Leads Driving School",
+                        "Leads Generated": 152.0,
                         "Status": "Sent",
                         "Import Schedule": "2026-04-01",
                         "Date Sent": "2026-04-01",
-                        "Email Content Used": "Archficient Email Content",
+                        "Email Content Used": "DSAA Members",
+                        "CRM Status": "Sent",
+                        "Clicked": 5.0,
+                        "Opened": 99.0,
+                        "Replied": 4.0,
+                        "Delivered": 511.0,
+                        "Replied 2": 4.0,
+                        "Open Rate %": 0.1937377691
+            },
+            {
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Healthcare",
+                        "Leads Generated": 200.0,
+                        "Status": "Sent",
+                        "Import Schedule": "2026-04-06",
+                        "Date Sent": "2026-04-07",
+                        "Email Content Used": "Job Openings",
                         "CRM Status": "Sent",
                         "Clicked": 8.0,
-                        "Opened": 45.0,
+                        "Opened": 90.0,
                         "Replied": 0.0,
-                        "Delivered": 375.0,
-                        "Open Rate %": 0.1113861386
+                        "Delivered": 183.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.4918032787
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (5)",
-                        "Leads Generated": 300.0,
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Healthcare",
+                        "Leads Generated": 100.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-04-13",
-                        "Date Sent": "2026-04-13",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-04-06",
+                        "Date Sent": "2026-04-08",
+                        "Email Content Used": "Job Openings",
                         "CRM Status": "Sent",
-                        "Clicked": 14.0,
-                        "Opened": 45.0,
+                        "Clicked": 6.0,
+                        "Opened": 44.0,
                         "Replied": 0.0,
-                        "Delivered": 280.0,
-                        "Open Rate %": 0.15
+                        "Delivered": 99.0,
+                        "Replied 2": 0.0,
+                        "Open Rate %": 0.4444444444
             },
             {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (6)",
-                        "Leads Generated": 300.0,
+                        "Company": "TeamFicient",
+                        "Industry": "NEW Leads Healthcare",
+                        "Leads Generated": 183.0,
                         "Status": "Sent",
-                        "Import Schedule": "2026-04-14",
-                        "Date Sent": "2026-04-14",
-                        "Email Content Used": "Archficient Email Content",
+                        "Import Schedule": "2026-04-06",
+                        "Date Sent": "2026-04-09",
+                        "Email Content Used": "Job Openings",
                         "CRM Status": "Sent",
-                        "Clicked": 7.0,
-                        "Opened": 25.0,
-                        "Replied": 0.0,
-                        "Delivered": 271.0,
-                        "Open Rate %": 0.08333333333
-            },
-            {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (7)",
-                        "Leads Generated": 300.0,
-                        "Status": "Sent",
-                        "Import Schedule": "2026-04-15",
-                        "Date Sent": "2026-04-15",
-                        "Email Content Used": "Archficient Email Content",
-                        "CRM Status": "Sent",
-                        "Clicked": 21.0,
-                        "Opened": 42.0,
-                        "Replied": 0.0,
-                        "Delivered": 261.0,
-                        "Open Rate %": 0.14
-            },
-            {
-                        "Company": "ArchFicient",
-                        "POC": "Cresha",
-                        "Industry": "Architecture",
-                        "Source": "Chicago Build Expo (8)",
-                        "Leads Generated": 300.0,
-                        "Status": "Sent",
-                        "Import Schedule": "2026-04-16",
-                        "Date Sent": "2026-04-16",
-                        "Email Content Used": "Archficient Email Content",
-                        "CRM Status": "Sent",
-                        "Clicked": 2.0,
-                        "Opened": 12.0,
-                        "Replied": 0.0,
-                        "Delivered": 265.0,
-                        "Open Rate %": 0.04
+                        "Clicked": 40.0,
+                        "Opened": 77.0,
+                        "Replied": 2.0,
+                        "Delivered": 168.0,
+                        "Replied 2": 2.0,
+                        "Open Rate %": 0.4583333333
             }
 ];
 

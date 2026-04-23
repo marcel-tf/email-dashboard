@@ -58,7 +58,8 @@ COMPANIES = {
     },
     'iDrivio': {
         'sheet': 'Medicar SafetyiDrivio',
-        'replies_sheet': None,
+        'replies_sheet': 'Medicar Safety Replies',
+        'sales_sheet': 'Medicar Safety SALES',
         'colors': {
             'body_gradient': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
             'header_gradient': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
@@ -66,6 +67,7 @@ COMPANIES = {
             'secondary': '#d97706',
             'accent': '#b45309'
         }
+        # Sin filter_company para incluir TODOS los datos de la hoja (iDrivio + Medicar Safety)
     },
     'ArchFicient': {
         'sheet': 'ArchFicient',
@@ -112,11 +114,16 @@ def format_date(date_val):
     except:
         return ''
 
-def read_company_data(sheet_name):
+def read_company_data(sheet_name, filter_company=None):
     """Lee los datos de una compañía desde el Excel - SOLO campañas con Status = 'Sent'"""
     try:
         df = pd.read_excel(EXCEL_FILE, sheet_name=sheet_name, skiprows=[0])
         df = df.dropna(how='all')
+
+        # FILTRAR por compañía si se especifica (para sheets compartidas como Medicar SafetyiDrivio)
+        if filter_company and 'Company' in df.columns:
+            df = df[df['Company'].str.contains(filter_company, case=False, na=False)]
+            print(f"  Filtradas {len(df)} filas para compañía '{filter_company}'")
 
         # FILTRAR SOLO Status/Lead Status = 'Sent'
         if 'Status' in df.columns:
@@ -169,6 +176,30 @@ def read_replies_data(sheet_name):
         return replies
     except Exception as e:
         print(f"  ERROR leyendo replies {sheet_name}: {e}")
+        return []
+
+def read_sales_data(sheet_name):
+    """Lee los datos de SALES desde el Excel"""
+    if not sheet_name:
+        return []
+
+    try:
+        df = pd.read_excel(EXCEL_FILE, sheet_name=sheet_name, header=0)
+        df = df.dropna(how='all')
+
+        sales = []
+        for _, row in df.iterrows():
+            sale = {}
+            for col in df.columns:
+                val = row[col]
+                if pd.notna(val):
+                    sale[col] = str(val).strip()
+            if sale:
+                sales.append(sale)
+
+        return sales
+    except Exception as e:
+        print(f"  ERROR leyendo sales {sheet_name}: {e}")
         return []
 
 def get_category_class(category):
@@ -2782,6 +2813,346 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
 
     return html
 
+def generate_medicar_replies_html(company_name, company_data, replies_data):
+    """Genera el HTML de replies para Medicar con distinción entre Calls y Replies"""
+
+    colors = company_data['colors']
+
+    # Separar entre Calls y Replies
+    calls = [r for r in replies_data if r.get('Reply/Calls', '').lower().strip() == 'call']
+    emails = [r for r in replies_data if r.get('Reply/Calls', '').lower().strip() == 'reply']
+    total_count = len(replies_data)
+
+    # Contar por categoría para todos
+    real_category_counts = {}
+    for reply in replies_data:
+        category = reply.get('Category', 'Unknown')
+        if category not in real_category_counts:
+            real_category_counts[category] = 0
+        real_category_counts[category] += 1
+
+    sorted_categories = sorted(real_category_counts.keys(), key=lambda x: (x.lower() != 'sold', x.lower()))
+
+    # Función auxiliar para formatear fecha
+    def parse_date(date_str):
+        if not date_str:
+            return '1900-01-01'
+        date_str = str(date_str).strip().split(' ')[0]
+        parts = date_str.split('-')
+        if len(parts) == 3:
+            if len(parts[0]) == 2:
+                return f"{parts[2]}-{parts[1]}-{parts[0]}"
+            else:
+                return date_str
+        return '1900-01-01'
+
+    def format_date_display(date_str):
+        if not date_str:
+            return 'Unknown'
+        date_str = str(date_str).strip().split(' ')[0]
+        parts = date_str.split('-')
+        if len(parts) == 3:
+            if len(parts[0]) == 2:
+                return f"{parts[0]}/{parts[1]}/{parts[2]}"
+            else:
+                return f"{parts[2]}/{parts[1]}/{parts[0]}"
+        return 'Unknown'
+
+    # Generar tarjetas para ambos tipos
+    def generate_cards(items, item_type):
+        cards_html = ''
+        sorted_items = sorted(items, key=lambda x: parse_date(x.get('Date', '')), reverse=True)
+
+        for item in sorted_items:
+            who = item.get('Who', 'Unknown')
+            email = item.get('Email', '')
+            message = item.get('Reply/Calls', '')
+            action = item.get('Action Taken', '')
+            subject = item.get('Subject if email ', '')
+            campaign = item.get('Email Campaign', '')
+            category = item.get('Category', 'Neutral')
+            date_raw = item.get('Date', '')
+            date_display = format_date_display(date_raw)
+            date_sortable = parse_date(date_raw)
+            cat_class = get_category_class(category)
+
+            type_badge = '📞 Call' if item_type == 'call' else '📧 Email Reply'
+
+            cards_html += f'''
+            <div class="response-card {cat_class}" data-category="{cat_class}" data-date="{date_sortable}" data-type="{item_type}">
+                <div class="response-header">
+                    <div>
+                        <div class="response-who">{who}</div>
+                        <div class="response-email">{email}</div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="type-badge {item_type}">{type_badge}</span>
+                        <div class="response-category {cat_class}">{category}</div>
+                    </div>
+                </div>
+                <div class="response-date">
+                    <span class="date-icon">📅</span> {date_display}
+                </div>
+                <div class="response-details">
+                    {f'<div class="response-detail-item"><span class="response-detail-label">Subject:</span><span class="response-detail-value">{subject}</span></div>' if subject else ''}
+                    <div class="response-detail-item">
+                        <span class="response-detail-label">Campaign:</span>
+                        <span class="response-detail-value">{campaign}</span>
+                    </div>
+                    <div class="response-detail-item">
+                        <span class="response-detail-label">Action Taken:</span>
+                        <span class="response-detail-value">{action}</span>
+                    </div>
+                </div>
+            </div>
+            '''
+
+        return cards_html
+
+    all_cards = generate_cards(calls, 'call') + generate_cards(emails, 'reply')
+
+    # Generar botones de filtro por categoría
+    filter_buttons_html = '<button class="filter-btn all active" onclick="filterResponses(\'all\')">All ({total})</button>'.format(total=total_count)
+    filter_buttons_html += f'<button class="filter-btn call" onclick="filterByType(\'call\')">📞 Calls ({len(calls)})</button>'
+    filter_buttons_html += f'<button class="filter-btn reply" onclick="filterByType(\'reply\')">📧 Email Replies ({len(emails)})</button>'
+
+    for category in sorted_categories:
+        count = real_category_counts[category]
+        cat_class = get_category_class(category)
+        filter_buttons_html += f'<button class="filter-btn {cat_class}" onclick="filterResponses(\'{cat_class}\')">{category} ({count})</button>'
+
+    # HTML completo (versión abreviada por espacio)
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Response Analysis - {company_name} (Calls & Replies)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: {colors['body_gradient']}; padding: 20px; min-height: 100vh; }}
+        .container {{ max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); overflow: hidden; }}
+        header {{ background: {colors['header_gradient']}; color: white; padding: 30px 40px; display: flex; justify-content: space-between; align-items: center; }}
+        header h1 {{ font-size: 32px; font-weight: 600; }}
+        .back-btn {{ padding: 12px 25px; background: rgba(255, 255, 255, 0.2); color: white; border: 2px solid white; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; }}
+        .back-btn:hover {{ background: white; color: {colors['primary']}; }}
+        .content {{ padding: 40px; }}
+        .summary-stats {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }}
+        .stat-card {{ background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 10px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }}
+        .stat-card h3 {{ font-size: 14px; color: #6c757d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }}
+        .stat-card .stat-value {{ font-size: 36px; font-weight: 700; color: {colors['primary']}; }}
+        .type-badge {{ padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }}
+        .type-badge.call {{ background: #10b981; color: white; }}
+        .type-badge.reply {{ background: #3b82f6; color: white; }}
+        .response-card {{ background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-left: 5px solid; transition: transform 0.2s ease; }}
+        .response-card:hover {{ transform: translateX(5px); }}
+        .response-card.not-interested {{ border-left-color: #9ca3af; }}
+        .response-card.engaged-interested {{ border-left-color: #10b981; }}
+        .response-card.hot-lead {{ border-left-color: #3b82f6; }}
+        .response-card.no-action {{ border-left-color: #8b5cf6; }}
+        .response-card.follow-up {{ border-left-color: #d4a574; }}
+        .response-card.pipelined {{ border-left-color: #06b6d4; }}
+        .response-card.invalid {{ border-left-color: #4b5563; }}
+        .response-card.sold {{ border-left-color: #fbbf24; }}
+        .response-card.existing-client {{ border-left-color: #ec4899; }}
+        .response-card.neutral {{ border-left-color: #94a3b8; }}
+        .response-header {{ display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; }}
+        .response-who {{ font-size: 20px; font-weight: 700; color: #2c3e50; }}
+        .response-email {{ font-size: 14px; color: #7f8c8d; margin-top: 5px; }}
+        .response-category {{ padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }}
+        .response-category.not-interested {{ background: #9ca3af; color: white; }}
+        .response-category.engaged-interested {{ background: #10b981; color: white; }}
+        .response-category.hot-lead {{ background: #3b82f6; color: white; }}
+        .response-category.no-action {{ background: #8b5cf6; color: white; }}
+        .response-category.follow-up {{ background: #d4a574; color: white; }}
+        .response-category.pipelined {{ background: #06b6d4; color: white; }}
+        .response-category.invalid {{ background: #4b5563; color: white; }}
+        .response-category.sold {{ background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; font-weight: 700; }}
+        .response-category.existing-client {{ background: #ec4899; color: white; }}
+        .response-category.neutral {{ background: #94a3b8; color: white; }}
+        .response-date {{ background: #f0f9ff; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; color: #1e40af; margin-bottom: 15px; display: inline-block; }}
+        .response-details {{ margin-bottom: 15px; }}
+        .response-detail-item {{ display: flex; margin-bottom: 8px; font-size: 14px; }}
+        .response-detail-label {{ font-weight: 600; color: #2c3e50; min-width: 120px; }}
+        .response-detail-value {{ color: #5a6c7d; }}
+        .filter-buttons {{ display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }}
+        .filter-btn {{ padding: 10px 20px; border: 2px solid #e9ecef; background: white; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }}
+        .filter-btn:hover {{ transform: translateY(-2px); }}
+        .filter-btn.active {{ color: white; }}
+        .filter-btn.all.active {{ background: #2c3e50; border-color: #2c3e50; }}
+        .filter-btn.call.active {{ background: #10b981; border-color: #10b981; color: white; }}
+        .filter-btn.reply.active {{ background: #3b82f6; border-color: #3b82f6; color: white; }}
+        .filter-btn.not-interested.active {{ background: #9ca3af; border-color: #9ca3af; }}
+        .filter-btn.engaged-interested.active {{ background: #10b981; border-color: #10b981; }}
+        .filter-btn.hot-lead.active {{ background: #3b82f6; border-color: #3b82f6; }}
+        .filter-btn.no-action.active {{ background: #8b5cf6; border-color: #8b5cf6; }}
+        .filter-btn.follow-up.active {{ background: #d4a574; border-color: #d4a574; }}
+        .filter-btn.pipelined.active {{ background: #06b6d4; border-color: #06b6d4; }}
+        .filter-btn.invalid.active {{ background: #4b5563; border-color: #4b5563; }}
+        .filter-btn.sold.active {{ background: #fbbf24; border-color: #fbbf24; color: #000; }}
+        .filter-btn.existing-client.active {{ background: #ec4899; border-color: #ec4899; }}
+        .filter-btn.neutral.active {{ background: #94a3b8; border-color: #94a3b8; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📞📧 Response Analysis - {company_name}</h1>
+            <a href="dashboard_{company_name.lower()}.html" class="back-btn">← Back to Dashboard</a>
+        </header>
+        <div class="content">
+            <div class="summary-stats">
+                <div class="stat-card"><h3>Total Responses</h3><div class="stat-value">{total_count}</div></div>
+                <div class="stat-card"><h3>📞 Phone Calls</h3><div class="stat-value">{len(calls)}</div></div>
+                <div class="stat-card"><h3>📧 Email Replies</h3><div class="stat-value">{len(emails)}</div></div>
+            </div>
+            <div class="filter-buttons">{filter_buttons_html}</div>
+            <div class="responses-section">{all_cards}</div>
+        </div>
+    </div>
+    <script>
+        function filterResponses(category) {{
+            const cards = document.querySelectorAll('.response-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            cards.forEach(card => {{
+                card.style.display = category === 'all' || card.dataset.category === category ? 'block' : 'none';
+            }});
+        }}
+        function filterByType(type) {{
+            const cards = document.querySelectorAll('.response-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            cards.forEach(card => {{
+                card.style.display = card.dataset.type === type ? 'block' : 'none';
+            }});
+        }}
+    </script>
+</body>
+</html>'''
+    return html
+
+def generate_sales_html(company_name, company_data, sales_data):
+    """Genera el HTML de SALES para Medicar"""
+    colors = company_data['colors']
+    total_sales = len(sales_data)
+    total_amount = 0
+    for sale in sales_data:
+        try:
+            amount_clean = sale.get('Amount', '0').replace('$', '').replace(',', '').strip()
+            total_amount += float(amount_clean)
+        except:
+            pass
+
+    def format_date_display(date_str):
+        if not date_str:
+            return 'Unknown'
+        date_str = str(date_str).strip().split(' ')[0]
+        parts = date_str.split('-')
+        if len(parts) == 3:
+            return f"{parts[0]}/{parts[1]}/{parts[2]}" if len(parts[0]) == 2 else f"{parts[2]}/{parts[1]}/{parts[0]}"
+        return date_str
+
+    sales_cards_html = ''
+    for i, sale in enumerate(sales_data, 1):
+        who = sale.get('Who', 'Unknown')
+        email = sale.get('Email', '')
+        message = sale.get('Message', '')
+        subject = sale.get('Subject', '')
+        amount = sale.get('Amount', '$0')
+        action = sale.get('Action Taken', '')
+        campaign = sale.get('Email Campaign Title', '')
+        category = sale.get('Category', '')
+        date_reply = format_date_display(sale.get('Date of Reply', ''))
+        date_sent = format_date_display(sale.get('When was this email campaign sent?', ''))
+
+        sales_cards_html += f'''
+        <div class="sale-card">
+            <div class="sale-header">
+                <div class="sale-number">💰 Sale #{i}</div>
+                <div class="sale-amount">{amount}</div>
+            </div>
+            <div class="sale-info">
+                <div class="sale-client"><div class="client-name">{who}</div><div class="client-email">{email}</div></div>
+                <div class="sale-dates">
+                    <div class="date-item"><span class="date-label">Campaign Sent:</span><span class="date-value">{date_sent}</span></div>
+                    <div class="date-item"><span class="date-label">Reply Received:</span><span class="date-value">{date_reply}</span></div>
+                </div>
+            </div>
+            <div class="sale-details">
+                <div class="sale-detail-item"><span class="sale-detail-label">📧 Campaign:</span><span class="sale-detail-value">{campaign}</span></div>
+                {f'<div class="sale-detail-item"><span class="sale-detail-label">📝 Subject:</span><span class="sale-detail-value">{subject}</span></div>' if subject else ''}
+                {f'<div class="sale-detail-item"><span class="sale-detail-label">🏷️ Category:</span><span class="sale-detail-value">{category}</span></div>' if category else ''}
+                <div class="sale-detail-item"><span class="sale-detail-label">✅ Action Taken:</span><span class="sale-detail-value">{action}</span></div>
+            </div>
+            {f'<div class="sale-message">{message}</div>' if message else ''}
+        </div>'''
+
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Sales - {company_name}</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: {colors['body_gradient']}; padding: 20px; min-height: 100vh; }}
+        .container {{ max-width: 1200px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); overflow: hidden; }}
+        header {{ background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1a1a1a; padding: 40px; text-align: center; position: relative; }}
+        header h1 {{ font-size: 42px; font-weight: 700; margin-bottom: 10px; }}
+        header p {{ font-size: 18px; opacity: 0.9; }}
+        .back-btn {{ position: absolute; top: 40px; left: 40px; padding: 12px 25px; background: rgba(255, 255, 255, 0.3); color: #1a1a1a; border: 2px solid #1a1a1a; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-block; }}
+        .back-btn:hover {{ background: #1a1a1a; color: #fbbf24; }}
+        .content {{ padding: 40px; }}
+        .summary-stats {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 40px; }}
+        .stat-card {{ background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2); border: 2px solid #fbbf24; }}
+        .stat-card h3 {{ font-size: 16px; color: #92400e; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }}
+        .stat-card .stat-value {{ font-size: 48px; font-weight: 700; color: #92400e; }}
+        .sales-grid {{ display: grid; gap: 30px; }}
+        .sale-card {{ background: white; border-radius: 12px; padding: 30px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); border-left: 6px solid #fbbf24; transition: all 0.3s ease; }}
+        .sale-card:hover {{ transform: translateX(5px); box-shadow: 0 8px 25px rgba(251, 191, 36, 0.3); }}
+        .sale-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #fef3c7; }}
+        .sale-number {{ font-size: 24px; font-weight: 700; color: #92400e; }}
+        .sale-amount {{ font-size: 32px; font-weight: 700; color: #fbbf24; background: linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }}
+        .sale-info {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }}
+        .sale-client {{ background: #f8f9fa; padding: 15px; border-radius: 8px; }}
+        .client-name {{ font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 5px; }}
+        .client-email {{ font-size: 14px; color: #7f8c8d; }}
+        .sale-dates {{ background: #f0f9ff; padding: 15px; border-radius: 8px; }}
+        .date-item {{ display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }}
+        .date-item:last-child {{ margin-bottom: 0; }}
+        .date-label {{ font-weight: 600; color: #2c3e50; }}
+        .date-value {{ color: #1e40af; font-weight: 600; }}
+        .sale-details {{ background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 15px; }}
+        .sale-detail-item {{ display: flex; margin-bottom: 10px; font-size: 15px; }}
+        .sale-detail-item:last-child {{ margin-bottom: 0; }}
+        .sale-detail-label {{ font-weight: 600; color: #2c3e50; min-width: 130px; }}
+        .sale-detail-value {{ color: #5a6c7d; flex: 1; }}
+        .sale-message {{ background: #fef3c7; padding: 20px; border-radius: 8px; font-size: 15px; line-height: 1.6; color: #2c3e50; font-style: italic; border-left: 4px solid #fbbf24; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="dashboard_{company_name.lower()}.html" class="back-btn">← Back to Dashboard</a>
+            <h1>💰 SALES ACHIEVED</h1>
+            <p>Direct sales generated from email campaigns</p>
+        </header>
+        <div class="content">
+            <div class="summary-stats">
+                <div class="stat-card"><h3>🎯 Total Sales</h3><div class="stat-value">{total_sales}</div></div>
+                <div class="stat-card"><h3>💵 Total Revenue</h3><div class="stat-value">${total_amount:,.2f}</div></div>
+            </div>
+            <div class="sales-grid">{sales_cards_html}</div>
+        </div>
+    </div>
+</body>
+</html>'''
+    return html
+
 def main():
     print("=" * 80)
     print("ACTUALIZANDO TODOS LOS DASHBOARDS Y REPLIES")
@@ -2791,8 +3162,9 @@ def main():
     for company_name, company_data in COMPANIES.items():
         print(f"[{company_name}]")
 
-        # Leer datos de campañas
-        data_records = read_company_data(company_data['sheet'])
+        # Leer datos de campañas (con filtro opcional para sheets compartidas)
+        filter_company = company_data.get('filter_company')
+        data_records = read_company_data(company_data['sheet'], filter_company)
 
         if not data_records:
             print(f"  ADVERTENCIA: No hay datos para {company_name}")
@@ -2808,12 +3180,29 @@ def main():
             print(f"  Replies: {len(replies_data)}")
 
             if replies_data:
-                # Generar HTML de replies
-                replies_html = generate_replies_html(company_name, company_data, replies_data)
+                # Para iDrivio (que incluye Medicar), generar versión especial con distinción Calls/Replies
+                if company_name == 'iDrivio':
+                    replies_html = generate_medicar_replies_html(company_name, company_data, replies_data)
+                else:
+                    # Generar HTML de replies normal
+                    replies_html = generate_replies_html(company_name, company_data, replies_data)
+
                 replies_filename = f"replies_{company_name.lower().replace(' ', '')}.html"
                 with open(replies_filename, 'w', encoding='utf-8') as f:
                     f.write(replies_html)
                 print(f"  CREADO: {replies_filename}")
+
+        # Leer y generar página de SALES si existe (solo Medicar por ahora)
+        if company_data.get('sales_sheet'):
+            sales_data = read_sales_data(company_data['sales_sheet'])
+            print(f"  Sales: {len(sales_data)}")
+
+            if sales_data:
+                sales_html = generate_sales_html(company_name, company_data, sales_data)
+                sales_filename = f"sales_{company_name.lower().replace(' ', '')}.html"
+                with open(sales_filename, 'w', encoding='utf-8') as f:
+                    f.write(sales_html)
+                print(f"  CREADO: {sales_filename}")
 
         # Generar HTML del dashboard (usar versión mejorada para TeamFicient)
         if company_name == 'TeamFicient':
