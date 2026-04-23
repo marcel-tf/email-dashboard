@@ -305,10 +305,12 @@ def generate_replies_html(company_name, company_data, replies_data):
     for reply in sorted_replies:
         who = reply.get('Who', 'Unknown')
         email = reply.get('Email', '')
-        message = reply.get('Reply/Calls', '')
+        # Buscar el mensaje: primero 'Message', luego 'Reply/Calls' (para compatibilidad)
+        message = reply.get('Message', reply.get('Reply/Calls', ''))
         action = reply.get('Action Taken', '')
         subject = reply.get('Subject if email ', reply.get('Subject', ''))
-        campaign = reply.get('Email Campaign', '')
+        # Buscar la campaña: primero 'Email Campaign Title', luego 'Email Campaign'
+        campaign = reply.get('Email Campaign Title', reply.get('Email Campaign', ''))
         category = reply.get('Category', 'Neutral')
         date_raw = reply.get('Date', '')
         date_display = format_date_display(date_raw)  # Formato consistente DD/MM/YYYY
