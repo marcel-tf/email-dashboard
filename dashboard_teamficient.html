@@ -352,11 +352,11 @@
                 </div>
                 <div class="filter-group">
                     <label for="startDate">Start Date</label>
-                    <input type="date" id="startDate" class="date-input" onchange="updateDashboard()">
+                    <input type="date" id="startDate" class="date-input" onchange="handleDateChange()">
                 </div>
                 <div class="filter-group">
                     <label for="endDate">End Date</label>
-                    <input type="date" id="endDate" class="date-input" onchange="updateDashboard()">
+                    <input type="date" id="endDate" class="date-input" onchange="handleDateChange()">
                 </div>
                 <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
             </div>
@@ -388,16 +388,16 @@
                     <div class="kpi-subtitle">Customer responses</div>
                 </div>
 
-                <div class="kpi-card purple">
-                    <div class="kpi-label">Reply Rate</div>
-                    <div class="kpi-value" id="replyRate">0%</div>
-                    <div class="kpi-subtitle">Of delivered emails</div>
-                </div>
-
                 <div class="kpi-card cyan">
                     <div class="kpi-label">Click Rate</div>
                     <div class="kpi-value" id="clickRate">0%</div>
                     <div class="kpi-subtitle">CTR (click-through)</div>
+                </div>
+
+                <div class="kpi-card" style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white;">
+                    <div class="kpi-label">Total Bounces</div>
+                    <div class="kpi-value" id="totalBounces">0</div>
+                    <div class="kpi-subtitle">Soft + Hard bounces</div>
                 </div>
             </div>
 
@@ -439,6 +439,13 @@
                         <canvas id="repliesTimelineChart"></canvas>
                     </div>
                 </div>
+
+                <div class="chart-card">
+                    <h3>📧 Email Bounces by Campaign</h3>
+                    <div class="chart-container small">
+                        <canvas id="bouncesChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -460,7 +467,9 @@
     "Replied": 0.0,
     "Delivered": 43.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.3953488372
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 4.0,
+    "Open Rate %": 0.3953488372093023
   },
   {
     "Company": "TeamFicient",
@@ -476,7 +485,9 @@
     "Replied": 6.0,
     "Delivered": 71.0,
     "Replied 2": 6.0,
-    "Open Rate %": 0.6338028169
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 25.0,
+    "Open Rate %": 0.6338028169014085
   },
   {
     "Company": "TeamFicient",
@@ -492,6 +503,8 @@
     "Replied": 0.0,
     "Delivered": 8.0,
     "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 5.0,
     "Open Rate %": 0.125
   },
   {
@@ -508,7 +521,9 @@
     "Replied": 0.0,
     "Delivered": 6.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.1666666667
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 4.0,
+    "Open Rate %": 0.16666666666666666
   },
   {
     "Company": "TeamFicient",
@@ -524,7 +539,9 @@
     "Replied": 0.0,
     "Delivered": 18.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.6666666667
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 25.0,
+    "Open Rate %": 0.6666666666666666
   },
   {
     "Company": "TeamFicient",
@@ -540,7 +557,9 @@
     "Replied": 0.0,
     "Delivered": 3.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.3333333333
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 5.0,
+    "Open Rate %": 0.3333333333333333
   },
   {
     "Company": "TeamFicient",
@@ -556,7 +575,9 @@
     "Replied": 2.0,
     "Delivered": 81.0,
     "Replied 2": 2.0,
-    "Open Rate %": 0.3456790123
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 4.0,
+    "Open Rate %": 0.345679012345679
   },
   {
     "Company": "TeamFicient",
@@ -572,7 +593,9 @@
     "Replied": 2.0,
     "Delivered": 211.0,
     "Replied 2": 2.0,
-    "Open Rate %": 0.5071090047
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 25.0,
+    "Open Rate %": 0.5071090047393365
   },
   {
     "Company": "TeamFicient",
@@ -588,7 +611,9 @@
     "Replied": 0.0,
     "Delivered": 29.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.4482758621
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 5.0,
+    "Open Rate %": 0.4482758620689655
   },
   {
     "Company": "TeamFicient",
@@ -604,7 +629,9 @@
     "Replied": 4.0,
     "Delivered": 391.0,
     "Replied 2": 4.0,
-    "Open Rate %": 0.5294117647
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 25.0,
+    "Open Rate %": 0.5294117647058824
   },
   {
     "Company": "TeamFicient",
@@ -620,7 +647,9 @@
     "Replied": 4.0,
     "Delivered": 173.0,
     "Replied 2": 4.0,
-    "Open Rate %": 0.6531791908
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 34.0,
+    "Open Rate %": 0.653179190751445
   },
   {
     "Company": "TeamFicient",
@@ -636,6 +665,8 @@
     "Replied": 4.0,
     "Delivered": 168.0,
     "Replied 2": 4.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 34.0,
     "Open Rate %": 0.375
   },
   {
@@ -652,7 +683,9 @@
     "Replied": 0.0,
     "Delivered": 243.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.4691358025
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 33.0,
+    "Open Rate %": 0.4691358024691358
   },
   {
     "Company": "TeamFicient",
@@ -668,7 +701,9 @@
     "Replied": 1.0,
     "Delivered": 331.0,
     "Replied 2": 1.0,
-    "Open Rate %": 0.4622356495
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 2.0,
+    "Open Rate %": 0.4622356495468278
   },
   {
     "Company": "TeamFicient",
@@ -684,7 +719,9 @@
     "Replied": 2.0,
     "Delivered": 279.0,
     "Replied 2": 2.0,
-    "Open Rate %": 0.3655913978
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 61.0,
+    "Open Rate %": 0.3655913978494624
   },
   {
     "Company": "TeamFicient",
@@ -700,7 +737,9 @@
     "Replied": 3.0,
     "Delivered": 795.0,
     "Replied 2": 3.0,
-    "Open Rate %": 0.3924528302
+    "Soft Bounce": 1.0,
+    "Hard Bounce": 82.0,
+    "Open Rate %": 0.39245283018867927
   },
   {
     "Company": "TeamFicient",
@@ -716,7 +755,9 @@
     "Replied": 3.0,
     "Delivered": 279.0,
     "Replied 2": 3.0,
-    "Open Rate %": 0.2759856631
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 61.0,
+    "Open Rate %": 0.27598566308243727
   },
   {
     "Company": "TeamFicient",
@@ -732,7 +773,9 @@
     "Replied": 2.0,
     "Delivered": 284.0,
     "Replied 2": 2.0,
-    "Open Rate %": 0.1373239437
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 11.0,
+    "Open Rate %": 0.13732394366197184
   },
   {
     "Company": "TeamFicient",
@@ -748,7 +791,9 @@
     "Replied": 3.0,
     "Delivered": 511.0,
     "Replied 2": 3.0,
-    "Open Rate %": 0.1937377691
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 18.0,
+    "Open Rate %": 0.19373776908023482
   },
   {
     "Company": "TeamFicient",
@@ -764,7 +809,9 @@
     "Replied": 0.0,
     "Delivered": 183.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.4918032787
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 59.0,
+    "Open Rate %": 0.4918032786885246
   },
   {
     "Company": "TeamFicient",
@@ -780,7 +827,9 @@
     "Replied": 2.0,
     "Delivered": 99.0,
     "Replied 2": 2.0,
-    "Open Rate %": 0.4444444444
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 59.0,
+    "Open Rate %": 0.4444444444444444
   },
   {
     "Company": "TeamFicient",
@@ -796,7 +845,9 @@
     "Replied": 4.0,
     "Delivered": 168.0,
     "Replied 2": 4.0,
-    "Open Rate %": 0.4583333333
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 59.0,
+    "Open Rate %": 0.4583333333333333
   },
   {
     "Company": "TeamFicient",
@@ -812,7 +863,9 @@
     "Replied": 1.0,
     "Delivered": 37.0,
     "Replied 2": 1.0,
-    "Open Rate %": 0.5945945946
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 0.0,
+    "Open Rate %": 0.5945945945945946
   },
   {
     "Company": "TeamFicient",
@@ -828,7 +881,9 @@
     "Replied": 1.0,
     "Delivered": 153.0,
     "Replied 2": 1.0,
-    "Open Rate %": 0.2614379085
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 7.0,
+    "Open Rate %": 0.26143790849673204
   },
   {
     "Company": "TeamFicient",
@@ -844,7 +899,9 @@
     "Replied": 2.0,
     "Delivered": 609.0,
     "Replied 2": 2.0,
-    "Open Rate %": 0.1691297209
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 18.0,
+    "Open Rate %": 0.16912972085385877
   },
   {
     "Company": "TeamFicient",
@@ -860,7 +917,9 @@
     "Replied": 0.0,
     "Delivered": 180.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.1777777778
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 0.0,
+    "Open Rate %": 0.17777777777777778
   },
   {
     "Company": "TeamFicient",
@@ -876,7 +935,9 @@
     "Replied": 0.0,
     "Delivered": 127.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.1181102362
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 25.0,
+    "Open Rate %": 0.11811023622047244
   },
   {
     "Company": "TeamFicient",
@@ -892,7 +953,9 @@
     "Replied": 0.0,
     "Delivered": 282.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.4468085106
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 2.0,
+    "Open Rate %": 0.44680851063829785
   },
   {
     "Company": "TeamFicient",
@@ -908,7 +971,9 @@
     "Replied": 0.0,
     "Delivered": 153.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.2418300654
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 34.0,
+    "Open Rate %": 0.24183006535947713
   },
   {
     "Company": "TeamFicient",
@@ -924,6 +989,8 @@
     "Replied": 0.0,
     "Delivered": 150.0,
     "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 34.0,
     "Open Rate %": 0.18
   },
   {
@@ -935,12 +1002,14 @@
     "Date Sent": "2026-04-27",
     "Email Content Used": "Job Openings",
     "CRM Status": "Sent",
-    "Clicked": 12.0,
-    "Opened": 83.0,
-    "Replied": 0.0,
-    "Delivered": 198.0,
+    "Clicked": 34.0,
+    "Opened": 283.0,
+    "Replied": 1.0,
+    "Delivered": 679.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.4191919192
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 21.0,
+    "Open Rate %": 0.4167893961708395
   },
   {
     "Company": "TeamFicient",
@@ -952,11 +1021,13 @@
     "Email Content Used": "Driving School",
     "CRM Status": "Sent",
     "Clicked": 0.0,
-    "Opened": 21.0,
-    "Replied": 0.0,
-    "Delivered": 89.0,
+    "Opened": 57.0,
+    "Replied": 1.0,
+    "Delivered": 263.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.2359550562
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 1.0,
+    "Open Rate %": 0.21673003802281368
   },
   {
     "Company": "TeamFicient",
@@ -967,12 +1038,122 @@
     "Date Sent": "2026-04-29",
     "Email Content Used": "Marketing",
     "CRM Status": "Sent",
-    "Clicked": 3.0,
-    "Opened": 69.0,
+    "Clicked": 8.0,
+    "Opened": 250.0,
     "Replied": 0.0,
-    "Delivered": 341.0,
+    "Delivered": 1016.0,
     "Replied 2": 0.0,
-    "Open Rate %": 0.2023460411
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 5.0,
+    "Open Rate %": 0.24606299212598426
+  },
+  {
+    "Company": "TeamFicient",
+    "Industry": "Dental-TX",
+    "Leads Generated": 121.0,
+    "Status": "Sent",
+    "Import Schedule": "2026-05-04",
+    "Date Sent": "2026-05-04",
+    "Email Content Used": "Dental-TX",
+    "CRM Status": "Sent",
+    "Clicked": 0.0,
+    "Opened": 6.0,
+    "Replied": 0.0,
+    "Delivered": 46.0,
+    "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 21.0,
+    "Open Rate %": 0.13043478260869565
+  },
+  {
+    "Company": "TeamFicient",
+    "Industry": "Pharmaceutical",
+    "Leads Generated": 310.0,
+    "Status": "Sent",
+    "Import Schedule": "2026-05-04",
+    "Date Sent": "2026-05-04",
+    "Email Content Used": "Pharmaceutical",
+    "CRM Status": "Sent",
+    "Clicked": 10.0,
+    "Opened": 93.0,
+    "Replied": 0.0,
+    "Delivered": 244.0,
+    "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 51.0,
+    "Open Rate %": 0.38114754098360654
+  },
+  {
+    "Company": "TeamFicient",
+    "Industry": "Dental-NY",
+    "Leads Generated": 183.0,
+    "Status": "Sent",
+    "Import Schedule": "2026-05-04",
+    "Date Sent": "2026-05-05",
+    "Email Content Used": "Dental-NY",
+    "CRM Status": "Sent",
+    "Clicked": 3.0,
+    "Opened": 32.0,
+    "Replied": 0.0,
+    "Delivered": 154.0,
+    "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 29.0,
+    "Open Rate %": 0.2077922077922078
+  },
+  {
+    "Company": "TeamFicient",
+    "Industry": "Remote Leverage",
+    "Leads Generated": 38.0,
+    "Status": "Sent",
+    "Import Schedule": "2026-05-04",
+    "Date Sent": "2026-05-05",
+    "Email Content Used": "Remote Leverage",
+    "CRM Status": "Sent",
+    "Clicked": 1.0,
+    "Opened": 4.0,
+    "Replied": 0.0,
+    "Delivered": 19.0,
+    "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 1.0,
+    "Open Rate %": 0.21052631578947367
+  },
+  {
+    "Company": "TeamFicient",
+    "Industry": "Dental-NJ",
+    "Leads Generated": 201.0,
+    "Status": "Sent",
+    "Import Schedule": "2026-05-04",
+    "Date Sent": "2026-05-06",
+    "Email Content Used": "Dental-NJ",
+    "CRM Status": "Sent",
+    "Clicked": 1.0,
+    "Opened": 25.0,
+    "Replied": 0.0,
+    "Delivered": 201.0,
+    "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 25.0,
+    "Open Rate %": 0.12437810945273632
+  },
+  {
+    "Company": "TeamFicient",
+    "Industry": "Summer Leads Driving School - B2",
+    "Leads Generated": 413.0,
+    "Status": "Sent",
+    "Import Schedule": "2026-05-04",
+    "Date Sent": "2026-05-06",
+    "Email Content Used": "Driving School",
+    "CRM Status": "Sent",
+    "Clicked": 2.0,
+    "Opened": 45.0,
+    "Replied": 0.0,
+    "Delivered": 413.0,
+    "Replied 2": 0.0,
+    "Soft Bounce": 0.0,
+    "Hard Bounce": 79.0,
+    "Open Rate %": 0.1089588377723971
   }
 ];
         window.repliesData = [
@@ -1435,6 +1616,26 @@
     "Date": "2026-04-15 00:00:00",
     "Email Campaign": "NEW Leads Healthcare - Email Drip Sequence",
     "Category": "Not Interested"
+  },
+  {
+    "Who": "Certified Driving School",
+    "Email": "larrydswindell@yahoo.com",
+    "Reply/Calls": "No thanks",
+    "Action Taken": "DND Emails desabled",
+    "Subject if email ": "Still Relevant For Your Driving School?",
+    "Date": "2026-05-04 00:00:00",
+    "Email Campaign": "Summer Leads Driving School - B1",
+    "Category": "Not Interested"
+  },
+  {
+    "Who": "Karen",
+    "Email": "kwallace@fsdental.net",
+    "Reply/Calls": "No thanks",
+    "Action Taken": "DND Emails desabled",
+    "Subject if email ": "Should I close this?",
+    "Date": "2026-05-04 00:00:00",
+    "Email Campaign": "New Leads Healthcare - Batch 3",
+    "Category": "Not Interested"
   }
 ];
 
@@ -1493,13 +1694,34 @@
             updateDashboard();
         }
 
-        // Populate campaign checkboxes
+        // Populate campaign checkboxes - DYNAMIC: filters by date range
         function populateCampaignCheckboxes() {
             const container = document.getElementById('campaignCheckboxes');
-            const campaigns = [...new Set(window.campaignData.map(c => c.Industry))].sort();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
 
+            // Filter campaigns by date range
+            let filteredCampaigns = window.campaignData;
+            if (startDate || endDate) {
+                filteredCampaigns = window.campaignData.filter(c => {
+                    if (startDate && c['Date Sent'] < startDate) return false;
+                    if (endDate && c['Date Sent'] > endDate) return false;
+                    return true;
+                });
+            }
+
+            // Get unique campaign names from filtered data
+            const campaigns = [...new Set(filteredCampaigns.map(c => c.Industry))].sort();
+
+            // Clear existing checkboxes
+            container.innerHTML = '';
+
+            // Clear and repopulate selectedCampaigns with ALL campaigns from filtered range
+            selectedCampaigns.clear();
+            campaigns.forEach(campaign => selectedCampaigns.add(campaign));
+
+            // Add checkboxes for campaigns in date range - ALL CHECKED by default
             campaigns.forEach(campaign => {
-                selectedCampaigns.add(campaign);
                 const div = document.createElement('div');
                 div.className = 'multi-select-option';
                 div.innerHTML = `
@@ -1509,6 +1731,9 @@
                 `;
                 container.appendChild(div);
             });
+
+            // Update "Select All" checkbox state
+            updateSelectAllState();
         }
 
         // Toggle multi-select dropdown
@@ -1533,15 +1758,27 @@
             const checkboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]:checked');
             checkboxes.forEach(cb => selectedCampaigns.add(cb.value));
 
+            updateSelectAllState();
+            updateDashboard();
+        }
+
+        // Update "Select All" checkbox and text
+        function updateSelectAllState() {
             const selectAll = document.getElementById('selectAll');
             const allCheckboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]');
-            selectAll.checked = checkboxes.length === allCheckboxes.length;
+            const checkedCheckboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]:checked');
+
+            selectAll.checked = checkedCheckboxes.length === allCheckboxes.length && allCheckboxes.length > 0;
 
             const text = selectedCampaigns.size === 0 ? 'No campaigns selected' :
                         selectedCampaigns.size === allCheckboxes.length ? 'All Campaigns Selected' :
                         `${selectedCampaigns.size} Campaign(s) Selected`;
             document.getElementById('selectedCampaignsText').textContent = text;
+        }
 
+        // Handle date changes - update campaign dropdown and dashboard
+        function handleDateChange() {
+            populateCampaignCheckboxes();
             updateDashboard();
         }
 
@@ -1549,11 +1786,17 @@
         function clearFilters() {
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
+            selectedCampaigns.clear();
+
+            // Repopulate campaign checkboxes with all campaigns
+            populateCampaignCheckboxes();
+
+            // Select all campaigns
+            window.campaignData.forEach(c => selectedCampaigns.add(c.Industry));
             document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = true);
             document.getElementById('selectAll').checked = true;
-            selectedCampaigns.clear();
-            window.campaignData.forEach(c => selectedCampaigns.add(c.Industry));
             document.getElementById('selectedCampaignsText').textContent = 'All Campaigns Selected';
+
             updateDashboard();
         }
 
@@ -1613,15 +1856,19 @@
 
             const totalReplied = filteredReplies.length;
             const avgOpenRate = totalDelivered > 0 ? (totalOpened / totalDelivered * 100) : 0;
-            const replyRate = totalDelivered > 0 ? (totalReplied / totalDelivered * 100) : 0;
             const clickRate = totalDelivered > 0 ? (totalClicked / totalDelivered * 100) : 0;
+
+            // Calculate total bounces (Soft Bounce + Hard Bounce)
+            const totalSoftBounces = data.reduce((sum, c) => sum + (parseFloat(c['Soft Bounce']) || 0), 0);
+            const totalHardBounces = data.reduce((sum, c) => sum + (parseFloat(c['Hard Bounce']) || 0), 0);
+            const totalBounces = totalSoftBounces + totalHardBounces;
 
             document.getElementById('totalLeads').textContent = totalLeads.toLocaleString();
             document.getElementById('avgOpenRate').textContent = avgOpenRate.toFixed(1) + '%';
             document.getElementById('totalClicked').textContent = totalClicked.toLocaleString();
             document.getElementById('totalReplied').textContent = totalReplied.toLocaleString();
-            document.getElementById('replyRate').textContent = replyRate.toFixed(2) + '%';
             document.getElementById('clickRate').textContent = clickRate.toFixed(2) + '%';
+            document.getElementById('totalBounces').textContent = totalBounces.toLocaleString();
         }
 
         // Render all charts
@@ -1631,6 +1878,7 @@
             renderReplyCategoriesChart();
             renderTopCampaignsChart(data);
             renderRepliesTimelineChart();
+            renderBouncesChart(data);
         }
 
         // Performance Chart (Enhanced Multi-Metric with Campaign Details)
@@ -2108,6 +2356,93 @@
                     maintainAspectRatio: false,
                     scales: {
                         x: { ticks: { maxRotation: 45, minRotation: 45 } }
+                    }
+                }
+            });
+        }
+
+        // Bounces Chart - Shows Soft Bounce and Hard Bounce by campaign
+        function renderBouncesChart(data) {
+            const ctx = document.getElementById('bouncesChart');
+            if (charts.bounces) charts.bounces.destroy();
+
+            // Sort data by date
+            const sortedData = [...data].sort((a, b) => a['Date Sent'].localeCompare(b['Date Sent']));
+
+            // Prepare labels and data
+            const labels = sortedData.map(c => {
+                const date = new Date(c['Date Sent']).toLocaleDateString();
+                const campaignShort = c.Industry.length > 20 ? c.Industry.substring(0, 20) + '...' : c.Industry;
+                return `${date}\n${campaignShort}`;
+            });
+
+            const softBounceData = sortedData.map(c => parseFloat(c['Soft Bounce']) || 0);
+            const hardBounceData = sortedData.map(c => parseFloat(c['Hard Bounce']) || 0);
+
+            charts.bounces = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Soft Bounce',
+                            data: softBounceData,
+                            backgroundColor: 'rgba(251, 191, 36, 0.7)',
+                            borderColor: '#f59e0b',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Hard Bounce',
+                            data: hardBounceData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: '#ef4444',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    const campaign = sortedData[index];
+                                    const date = new Date(campaign['Date Sent']).toLocaleDateString();
+                                    return `${date} - ${campaign.Industry}`;
+                                },
+                                afterBody: function(context) {
+                                    const index = context[0].dataIndex;
+                                    const soft = softBounceData[index];
+                                    const hard = hardBounceData[index];
+                                    const total = soft + hard;
+                                    return `Total Bounces: ${total}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Bounces'
+                            }
+                        }
                     }
                 }
             });

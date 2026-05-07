@@ -178,6 +178,41 @@ def read_replies_data(sheet_name):
         print(f"  ERROR leyendo replies {sheet_name}: {e}")
         return []
 
+def normalize_accusights_replies(replies_data):
+    """Normaliza los datos de AccuSights Replies al formato de TeamFicient para compatibilidad"""
+    normalized = []
+    for reply in replies_data:
+        normalized_reply = {}
+
+        # Mapear 'Email Campaign Title' -> 'Email Campaign'
+        if 'Email Campaign Title' in reply:
+            normalized_reply['Email Campaign'] = reply['Email Campaign Title']
+
+        # Mapear 'Date of Reply' -> 'Date' (mantener formato YYYY-MM-DD)
+        if 'Date of Reply' in reply:
+            date_str = reply['Date of Reply']
+            # Si ya es un string con formato de fecha, parsearlo y reformatearlo
+            try:
+                if isinstance(date_str, str) and len(date_str) > 10:
+                    # Formato: "2026-03-19 00:00:00" -> "2026-03-19"
+                    normalized_reply['Date'] = date_str.split(' ')[0]
+                else:
+                    normalized_reply['Date'] = date_str
+            except:
+                normalized_reply['Date'] = date_str
+
+        # Copiar el resto de columnas que son iguales
+        for col in ['Who', 'Email', 'Message', 'Subject', 'Action Taken', 'Category']:
+            if col in reply:
+                normalized_reply[col] = reply[col]
+
+        # También guardar 'Reply/Calls' como 'Reply' por defecto (AccuSights solo tiene emails)
+        normalized_reply['Reply/Calls'] = 'Reply'
+
+        normalized.append(normalized_reply)
+
+    return normalized
+
 def read_sales_data(sheet_name):
     """Lee los datos de SALES desde el Excel"""
     if not sheet_name:
@@ -1025,8 +1060,8 @@ def generate_replies_html(company_name, company_data, replies_data):
 '''
     return html
 
-def generate_dashboard_html(company_name, company_data, data_records, replies_count):
-    """Genera el HTML del dashboard con datos embebidos"""
+def generate_dashboard_html(company_name, company_data, data_records, replies_count, sales_data=None):
+    """Genera el HTML del dashboard con datos embebidos (incluye sales si está disponible)"""
 
     colors = company_data['colors']
 
@@ -1049,6 +1084,17 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
                     <div class="kpi-label">Total Replied</div>
                     <div class="kpi-value">0</div>
                     <div class="kpi-subtitle">No responses yet</div>
+                </div>
+        '''
+
+    # Sales button (solo para iDrivio)
+    sales_button = ''
+    if sales_data and len(sales_data) > 0:
+        sales_button = f'''
+                <div class="kpi-card" style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #1a1a1a; cursor: pointer;" onclick="window.location.href='sales_{company_name.lower().replace(' ', '')}.html'">
+                    <div class="kpi-label" style="color: #92400e;">Total Sales</div>
+                    <div class="kpi-value" style="color: #92400e;">{len(sales_data)}</div>
+                    <div class="kpi-subtitle" style="color: #92400e;">Closed deals (Click for details)</div>
                 </div>
         '''
 
@@ -1354,6 +1400,8 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
                 </div>
 
                 {replies_button}
+
+                {sales_button}
             </div>
 
             <div class="charts-section">
@@ -1513,15 +1561,18 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
         }}
 
         function updatePerformanceChart(data) {{
-            const dates = [...new Set(data.map(d => d.date))].sort();
-            const dateData = dates.map(date => {{
-                const dayData = data.filter(d => d.date === date);
-                return {{
-                    date,
-                    leads: dayData.reduce((sum, d) => sum + d.leads, 0),
-                    opened: dayData.reduce((sum, d) => sum + d.opened, 0),
-                    clicked: dayData.reduce((sum, d) => sum + d.clicked, 0)
-                }};
+            // Sort by date to show campaigns chronologically
+            const sortedData = [...data].sort((a, b) => {{
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                return dateA - dateB;
+            }});
+
+            // Create labels with date + campaign name
+            const labels = sortedData.map(row => {{
+                const date = formatChartDate(row.date);
+                const campaignShort = row.campaign.length > 25 ? row.campaign.substring(0, 25) + '...' : row.campaign;
+                return `${{date}}\\n${{campaignShort}}`;
             }});
 
             const ctx = document.getElementById('performanceChart');
@@ -1531,33 +1582,30 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
             }}
 
             charts.performance = new Chart(ctx, {{
-                type: 'line',
+                type: 'bar',
                 data: {{
-                    labels: dateData.map(d => formatChartDate(d.date)),
+                    labels: labels,
                     datasets: [
                         {{
                             label: 'Leads Generated',
-                            data: dateData.map(d => d.leads),
+                            data: sortedData.map(d => d.leads),
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
                             borderColor: '#3B82F6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4,
-                            fill: true
+                            borderWidth: 2
                         }},
                         {{
                             label: 'Emails Opened',
-                            data: dateData.map(d => d.opened),
+                            data: sortedData.map(d => d.opened),
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
                             borderColor: '#10B981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            tension: 0.4,
-                            fill: true
+                            borderWidth: 2
                         }},
                         {{
                             label: 'Links Clicked',
-                            data: dateData.map(d => d.clicked),
-                            borderColor: '#F43F5E',
-                            backgroundColor: 'rgba(244, 63, 94, 0.1)',
-                            tension: 0.4,
-                            fill: true
+                            data: sortedData.map(d => d.clicked),
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: '#F59E0B',
+                            borderWidth: 2
                         }}
                     ]
                 }},
@@ -1567,11 +1615,39 @@ def generate_dashboard_html(company_name, company_data, data_records, replies_co
                     plugins: {{
                         legend: {{
                             position: 'top',
+                            labels: {{
+                                usePointStyle: true,
+                                padding: 15
+                            }}
+                        }},
+                        tooltip: {{
+                            callbacks: {{
+                                title: function(context) {{
+                                    const index = context[0].dataIndex;
+                                    const row = sortedData[index];
+                                    return `${{formatDisplayDate(row.date)}} - ${{row.campaign}}`;
+                                }},
+                                label: function(context) {{
+                                    return `  ${{context.dataset.label}}: ${{context.parsed.y.toLocaleString()}}`;
+                                }}
+                            }}
                         }}
                     }},
                     scales: {{
+                        x: {{
+                            ticks: {{
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {{
+                                    size: 10
+                                }}
+                            }}
+                        }},
                         y: {{
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: {{
+                                precision: 0
+                            }}
                         }}
                     }}
                 }}
@@ -2039,11 +2115,11 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
                 </div>
                 <div class="filter-group">
                     <label for="startDate">Start Date</label>
-                    <input type="date" id="startDate" class="date-input" onchange="updateDashboard()">
+                    <input type="date" id="startDate" class="date-input" onchange="handleDateChange()">
                 </div>
                 <div class="filter-group">
                     <label for="endDate">End Date</label>
-                    <input type="date" id="endDate" class="date-input" onchange="updateDashboard()">
+                    <input type="date" id="endDate" class="date-input" onchange="handleDateChange()">
                 </div>
                 <button class="clear-filters-btn" onclick="clearFilters()">Clear Filters</button>
             </div>
@@ -2075,16 +2151,16 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
                     <div class="kpi-subtitle">Customer responses</div>
                 </div>
 
-                <div class="kpi-card purple">
-                    <div class="kpi-label">Reply Rate</div>
-                    <div class="kpi-value" id="replyRate">0%</div>
-                    <div class="kpi-subtitle">Of delivered emails</div>
-                </div>
-
                 <div class="kpi-card cyan">
                     <div class="kpi-label">Click Rate</div>
                     <div class="kpi-value" id="clickRate">0%</div>
                     <div class="kpi-subtitle">CTR (click-through)</div>
+                </div>
+
+                <div class="kpi-card" style="background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); color: white;">
+                    <div class="kpi-label">Total Bounces</div>
+                    <div class="kpi-value" id="totalBounces">0</div>
+                    <div class="kpi-subtitle">Soft + Hard bounces</div>
                 </div>
             </div>
 
@@ -2124,6 +2200,13 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
                     <h3>Replies Timeline</h3>
                     <div class="chart-container small">
                         <canvas id="repliesTimelineChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>📧 Email Bounces by Campaign</h3>
+                    <div class="chart-container small">
+                        <canvas id="bouncesChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -2190,13 +2273,34 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
             updateDashboard();
         }}
 
-        // Populate campaign checkboxes
+        // Populate campaign checkboxes - DYNAMIC: filters by date range
         function populateCampaignCheckboxes() {{
             const container = document.getElementById('campaignCheckboxes');
-            const campaigns = [...new Set(window.campaignData.map(c => c.Industry))].sort();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
 
+            // Filter campaigns by date range
+            let filteredCampaigns = window.campaignData;
+            if (startDate || endDate) {{
+                filteredCampaigns = window.campaignData.filter(c => {{
+                    if (startDate && c['Date Sent'] < startDate) return false;
+                    if (endDate && c['Date Sent'] > endDate) return false;
+                    return true;
+                }});
+            }}
+
+            // Get unique campaign names from filtered data
+            const campaigns = [...new Set(filteredCampaigns.map(c => c.Industry))].sort();
+
+            // Clear existing checkboxes
+            container.innerHTML = '';
+
+            // Clear and repopulate selectedCampaigns with ALL campaigns from filtered range
+            selectedCampaigns.clear();
+            campaigns.forEach(campaign => selectedCampaigns.add(campaign));
+
+            // Add checkboxes for campaigns in date range - ALL CHECKED by default
             campaigns.forEach(campaign => {{
-                selectedCampaigns.add(campaign);
                 const div = document.createElement('div');
                 div.className = 'multi-select-option';
                 div.innerHTML = `
@@ -2206,6 +2310,9 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
                 `;
                 container.appendChild(div);
             }});
+
+            // Update "Select All" checkbox state
+            updateSelectAllState();
         }}
 
         // Toggle multi-select dropdown
@@ -2230,15 +2337,27 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
             const checkboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]:checked');
             checkboxes.forEach(cb => selectedCampaigns.add(cb.value));
 
+            updateSelectAllState();
+            updateDashboard();
+        }}
+
+        // Update "Select All" checkbox and text
+        function updateSelectAllState() {{
             const selectAll = document.getElementById('selectAll');
             const allCheckboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]');
-            selectAll.checked = checkboxes.length === allCheckboxes.length;
+            const checkedCheckboxes = document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]:checked');
+
+            selectAll.checked = checkedCheckboxes.length === allCheckboxes.length && allCheckboxes.length > 0;
 
             const text = selectedCampaigns.size === 0 ? 'No campaigns selected' :
                         selectedCampaigns.size === allCheckboxes.length ? 'All Campaigns Selected' :
                         `${{selectedCampaigns.size}} Campaign(s) Selected`;
             document.getElementById('selectedCampaignsText').textContent = text;
+        }}
 
+        // Handle date changes - update campaign dropdown and dashboard
+        function handleDateChange() {{
+            populateCampaignCheckboxes();
             updateDashboard();
         }}
 
@@ -2246,11 +2365,17 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
         function clearFilters() {{
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
+            selectedCampaigns.clear();
+
+            // Repopulate campaign checkboxes with all campaigns
+            populateCampaignCheckboxes();
+
+            // Select all campaigns
+            window.campaignData.forEach(c => selectedCampaigns.add(c.Industry));
             document.querySelectorAll('#campaignCheckboxes input[type="checkbox"]').forEach(cb => cb.checked = true);
             document.getElementById('selectAll').checked = true;
-            selectedCampaigns.clear();
-            window.campaignData.forEach(c => selectedCampaigns.add(c.Industry));
             document.getElementById('selectedCampaignsText').textContent = 'All Campaigns Selected';
+
             updateDashboard();
         }}
 
@@ -2310,15 +2435,19 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
 
             const totalReplied = filteredReplies.length;
             const avgOpenRate = totalDelivered > 0 ? (totalOpened / totalDelivered * 100) : 0;
-            const replyRate = totalDelivered > 0 ? (totalReplied / totalDelivered * 100) : 0;
             const clickRate = totalDelivered > 0 ? (totalClicked / totalDelivered * 100) : 0;
+
+            // Calculate total bounces (Soft Bounce + Hard Bounce)
+            const totalSoftBounces = data.reduce((sum, c) => sum + (parseFloat(c['Soft Bounce']) || 0), 0);
+            const totalHardBounces = data.reduce((sum, c) => sum + (parseFloat(c['Hard Bounce']) || 0), 0);
+            const totalBounces = totalSoftBounces + totalHardBounces;
 
             document.getElementById('totalLeads').textContent = totalLeads.toLocaleString();
             document.getElementById('avgOpenRate').textContent = avgOpenRate.toFixed(1) + '%';
             document.getElementById('totalClicked').textContent = totalClicked.toLocaleString();
             document.getElementById('totalReplied').textContent = totalReplied.toLocaleString();
-            document.getElementById('replyRate').textContent = replyRate.toFixed(2) + '%';
             document.getElementById('clickRate').textContent = clickRate.toFixed(2) + '%';
+            document.getElementById('totalBounces').textContent = totalBounces.toLocaleString();
         }}
 
         // Render all charts
@@ -2328,6 +2457,7 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
             renderReplyCategoriesChart();
             renderTopCampaignsChart(data);
             renderRepliesTimelineChart();
+            renderBouncesChart(data);
         }}
 
         // Performance Chart (Enhanced Multi-Metric with Campaign Details)
@@ -2809,6 +2939,93 @@ def generate_improved_dashboard_teamficient(company_name, company_data, data_rec
                 }}
             }});
         }}
+
+        // Bounces Chart - Shows Soft Bounce and Hard Bounce by campaign
+        function renderBouncesChart(data) {{
+            const ctx = document.getElementById('bouncesChart');
+            if (charts.bounces) charts.bounces.destroy();
+
+            // Sort data by date
+            const sortedData = [...data].sort((a, b) => a['Date Sent'].localeCompare(b['Date Sent']));
+
+            // Prepare labels and data
+            const labels = sortedData.map(c => {{
+                const date = new Date(c['Date Sent']).toLocaleDateString();
+                const campaignShort = c.Industry.length > 20 ? c.Industry.substring(0, 20) + '...' : c.Industry;
+                return `${{date}}\\n${{campaignShort}}`;
+            }});
+
+            const softBounceData = sortedData.map(c => parseFloat(c['Soft Bounce']) || 0);
+            const hardBounceData = sortedData.map(c => parseFloat(c['Hard Bounce']) || 0);
+
+            charts.bounces = new Chart(ctx, {{
+                type: 'bar',
+                data: {{
+                    labels: labels,
+                    datasets: [
+                        {{
+                            label: 'Soft Bounce',
+                            data: softBounceData,
+                            backgroundColor: 'rgba(251, 191, 36, 0.7)',
+                            borderColor: '#f59e0b',
+                            borderWidth: 2
+                        }},
+                        {{
+                            label: 'Hard Bounce',
+                            data: hardBounceData,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: '#ef4444',
+                            borderWidth: 2
+                        }}
+                    ]
+                }},
+                options: {{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {{
+                        legend: {{
+                            display: true,
+                            position: 'top'
+                        }},
+                        tooltip: {{
+                            callbacks: {{
+                                title: function(context) {{
+                                    const index = context[0].dataIndex;
+                                    const campaign = sortedData[index];
+                                    const date = new Date(campaign['Date Sent']).toLocaleDateString();
+                                    return `${{date}} - ${{campaign.Industry}}`;
+                                }},
+                                afterBody: function(context) {{
+                                    const index = context[0].dataIndex;
+                                    const soft = softBounceData[index];
+                                    const hard = hardBounceData[index];
+                                    const total = soft + hard;
+                                    return `Total Bounces: ${{total}}`;
+                                }}
+                            }}
+                        }}
+                    }},
+                    scales: {{
+                        x: {{
+                            stacked: true,
+                            ticks: {{
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {{ size: 10 }}
+                            }}
+                        }},
+                        y: {{
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {{
+                                display: true,
+                                text: 'Number of Bounces'
+                            }}
+                        }}
+                    }}
+                }}
+            }});
+        }}
     </script>
 </body>
 </html>'''
@@ -3069,7 +3286,7 @@ def generate_sales_html(company_name, company_data, sales_data):
         campaign = sale.get('Email Campaign Title', '')
         category = sale.get('Category', '')
         date_reply = format_date_display(sale.get('Date of Reply', ''))
-        date_sent = format_date_display(sale.get('When was this email campaign sent?', ''))
+        student_name = str(sale.get('When was this email campaign sent?', 'Unknown')).strip()
 
         sales_cards_html += f'''
         <div class="sale-card">
@@ -3080,14 +3297,11 @@ def generate_sales_html(company_name, company_data, sales_data):
             <div class="sale-info">
                 <div class="sale-client"><div class="client-name">{who}</div><div class="client-email">{email}</div></div>
                 <div class="sale-dates">
-                    <div class="date-item"><span class="date-label">Campaign Sent:</span><span class="date-value">{date_sent}</span></div>
+                    <div class="date-item"><span class="date-label">Student Name:</span><span class="date-value">{student_name}</span></div>
                     <div class="date-item"><span class="date-label">Reply Received:</span><span class="date-value">{date_reply}</span></div>
                 </div>
             </div>
             <div class="sale-details">
-                <div class="sale-detail-item"><span class="sale-detail-label">📧 Campaign:</span><span class="sale-detail-value">{campaign}</span></div>
-                {f'<div class="sale-detail-item"><span class="sale-detail-label">📝 Subject:</span><span class="sale-detail-value">{subject}</span></div>' if subject else ''}
-                {f'<div class="sale-detail-item"><span class="sale-detail-label">🏷️ Category:</span><span class="sale-detail-value">{category}</span></div>' if category else ''}
                 <div class="sale-detail-item"><span class="sale-detail-label">✅ Action Taken:</span><span class="sale-detail-value">{action}</span></div>
             </div>
             {f'<div class="sale-message">{message}</div>' if message else ''}
@@ -3179,6 +3393,11 @@ def main():
         replies_data = []
         if company_data['replies_sheet']:
             replies_data = read_replies_data(company_data['replies_sheet'])
+
+            # Normalizar replies de AccuSights al formato de TeamFicient
+            if company_name == 'AccuSights':
+                replies_data = normalize_accusights_replies(replies_data)
+
             print(f"  Replies: {len(replies_data)}")
 
             if replies_data:
@@ -3194,23 +3413,29 @@ def main():
                     f.write(replies_html)
                 print(f"  CREADO: {replies_filename}")
 
-        # Leer y generar página de SALES si existe (solo Medicar por ahora)
+        # Leer SALES si existe (solo iDrivio por ahora)
+        sales_data = []
         if company_data.get('sales_sheet'):
             sales_data = read_sales_data(company_data['sales_sheet'])
             print(f"  Sales: {len(sales_data)}")
 
             if sales_data:
+                # Generar página separada de SALES
                 sales_html = generate_sales_html(company_name, company_data, sales_data)
                 sales_filename = f"sales_{company_name.lower().replace(' ', '')}.html"
                 with open(sales_filename, 'w', encoding='utf-8') as f:
                     f.write(sales_html)
                 print(f"  CREADO: {sales_filename}")
 
-        # Generar HTML del dashboard (usar versión mejorada para TeamFicient)
+        # Generar HTML del dashboard (usar versión mejorada para TeamFicient y AccuSights)
         if company_name == 'TeamFicient':
             html_content = generate_improved_dashboard_teamficient(company_name, company_data, data_records, replies_data)
+        elif company_name == 'AccuSights':
+            # Usar la misma función mejorada para AccuSights
+            html_content = generate_improved_dashboard_teamficient(company_name, company_data, data_records, replies_data)
         else:
-            html_content = generate_dashboard_html(company_name, company_data, data_records, len(replies_data))
+            # Dashboard estándar - incluir sales_data si existe
+            html_content = generate_dashboard_html(company_name, company_data, data_records, len(replies_data), sales_data if sales_data else None)
 
         # Guardar archivo
         filename = f"dashboard_{company_name.lower().replace(' ', '')}.html"
