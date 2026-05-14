@@ -530,7 +530,7 @@
                             <div class="stat-value">1 <span class="stat-percentage">(6%)</span></div>
                         </div><div class="stat-item pipelined">
                             <div class="stat-label">Circle Back</div>
-                            <div class="stat-value">1 <span class="stat-percentage">(6%)</span></div>
+                            <div class="stat-value">2 <span class="stat-percentage">(11%)</span></div>
                         </div><div class="stat-item engaged-interested">
                             <div class="stat-label">Engaged - Interested</div>
                             <div class="stat-value">1 <span class="stat-percentage">(6%)</span></div>
@@ -539,23 +539,23 @@
                             <div class="stat-value">1 <span class="stat-percentage">(6%)</span></div>
                         </div><div class="stat-item follow-up">
                             <div class="stat-label">Follow-Up Needed</div>
-                            <div class="stat-value">2 <span class="stat-percentage">(12%)</span></div>
+                            <div class="stat-value">2 <span class="stat-percentage">(11%)</span></div>
                         </div><div class="stat-item hot-lead">
                             <div class="stat-label">Hot Lead – Meeting Scheduled</div>
-                            <div class="stat-value">4 <span class="stat-percentage">(24%)</span></div>
+                            <div class="stat-value">4 <span class="stat-percentage">(22%)</span></div>
                         </div><div class="stat-item no-action">
                             <div class="stat-label">No Action Needed</div>
-                            <div class="stat-value">3 <span class="stat-percentage">(18%)</span></div>
+                            <div class="stat-value">3 <span class="stat-percentage">(17%)</span></div>
                         </div><div class="stat-item not-interested">
                             <div class="stat-label">Not Interested</div>
-                            <div class="stat-value">4 <span class="stat-percentage">(24%)</span></div>
+                            <div class="stat-value">4 <span class="stat-percentage">(22%)</span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="responses-section">
-                <h2>All Responses (17)</h2>
+                <h2>All Responses (18)</h2>
 
                 <div class="filters-container">
                     <div class="date-filters">
@@ -571,13 +571,41 @@
                     </div>
 
                     <div class="filter-buttons">
-                        <button class="filter-btn all active" onclick="filterResponses('all')">All (17)</button>
-                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn pipelined" onclick="filterResponses('pipelined')">Circle Back (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged - Interested (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (3)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (4)</button>
+                        <button class="filter-btn all active" onclick="filterResponses('all')">All (18)</button>
+                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (1)</button><button class="filter-btn pipelined" onclick="filterResponses('pipelined')">Circle Back (2)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged - Interested (1)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (1)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (4)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (3)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (4)</button>
                     </div>
                 </div>
 
                 <div id="responsesContainer">
                     
+        <div class="response-card pipelined" data-category="pipelined" data-date="2026-05-11">
+            <div class="response-header">
+                <div>
+                    <div class="response-who">Dr.Fogel</div>
+                    <div class="response-email">office@fogeldental.com</div>
+                </div>
+                <div class="response-category pipelined">Circle Back</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> 11/05/2026
+            </div>
+            <div class="response-details">
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Subject:</span>
+                    <span class="response-detail-value">Quick question</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Campaign:</span>
+                    <span class="response-detail-value">HIPAA Compliance</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Action Taken:</span>
+                    <span class="response-detail-value">Followed up with booking email - no friction</span>
+                </div>
+            </div>
+            <div class="response-message">"I forwarded this message and if Dr. Fogel wants to change the way he is doing things he will reach out to you. Thank you"</div>
+        </div>
+        
         <div class="response-card engaged-interested" data-category="engaged-interested" data-date="2026-04-29">
             <div class="response-header">
                 <div>
@@ -1177,7 +1205,7 @@ Founder | Auro Security"</div>
             data: {
                 labels: ['Sold','Circle Back','Engaged - Interested','Engaged – Interested','Follow-Up Needed','Hot Lead – Meeting Scheduled','No Action Needed','Not Interested'],
                 datasets: [{
-                    data: [1,1,1,1,2,4,3,4],
+                    data: [1,2,1,1,2,4,3,4],
                     backgroundColor: [
                         '#fbbf24','#06b6d4','#10b981','#10b981','#d4a574','#3b82f6','#8b5cf6','#9ca3af'
                     ],

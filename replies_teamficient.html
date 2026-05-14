@@ -548,17 +548,17 @@
                             <div class="stat-value">2 <span class="stat-percentage">(4%)</span></div>
                         </div><div class="stat-item not-interested">
                             <div class="stat-label">Not Interested</div>
-                            <div class="stat-value">27 <span class="stat-percentage">(56%)</span></div>
+                            <div class="stat-value">29 <span class="stat-percentage">(58%)</span></div>
                         </div><div class="stat-item pipelined">
                             <div class="stat-label">Pipelined / Circle Back</div>
-                            <div class="stat-value">7 <span class="stat-percentage">(15%)</span></div>
+                            <div class="stat-value">7 <span class="stat-percentage">(14%)</span></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="responses-section">
-                <h2>All Responses (48)</h2>
+                <h2>All Responses (50)</h2>
 
                 <div class="filters-container">
                     <div class="date-filters">
@@ -574,13 +574,78 @@
                     </div>
 
                     <div class="filter-buttons">
-                        <button class="filter-btn all active" onclick="filterResponses('all')">All (48)</button>
-                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (2)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (3)</button><button class="filter-btn existing-client" onclick="filterResponses('existing-client')">Existing Client (2)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (2)</button><button class="filter-btn invalid" onclick="filterResponses('invalid')">Invalid / Wrong Contact (1)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (2)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (27)</button><button class="filter-btn pipelined" onclick="filterResponses('pipelined')">Pipelined / Circle Back (7)</button>
+                        <button class="filter-btn all active" onclick="filterResponses('all')">All (50)</button>
+                        <button class="filter-btn sold" onclick="filterResponses('sold')">Sold (2)</button><button class="filter-btn engaged-interested" onclick="filterResponses('engaged-interested')">Engaged – Interested (3)</button><button class="filter-btn existing-client" onclick="filterResponses('existing-client')">Existing Client (2)</button><button class="filter-btn follow-up" onclick="filterResponses('follow-up')">Follow-Up Needed (2)</button><button class="filter-btn hot-lead" onclick="filterResponses('hot-lead')">Hot Lead – Meeting Scheduled (2)</button><button class="filter-btn invalid" onclick="filterResponses('invalid')">Invalid / Wrong Contact (1)</button><button class="filter-btn no-action" onclick="filterResponses('no-action')">No Action Needed (2)</button><button class="filter-btn not-interested" onclick="filterResponses('not-interested')">Not Interested (29)</button><button class="filter-btn pipelined" onclick="filterResponses('pipelined')">Pipelined / Circle Back (7)</button>
                     </div>
                 </div>
 
                 <div id="responsesContainer">
                     
+        <div class="response-card not-interested" data-category="not-interested" data-date="2026-05-13">
+            <div class="response-header">
+                <div>
+                    <div class="response-who">Red Bank Dentistry</div>
+                    <div class="response-email">info@redbankdentistry.com</div>
+                </div>
+                <div class="response-category not-interested">Not Interested</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> 13/05/2026
+            </div>
+            <div class="response-details">
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Subject:</span>
+                    <span class="response-detail-value">Following Up</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Campaign:</span>
+                    <span class="response-detail-value">Dental-NY</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Action Taken:</span>
+                    <span class="response-detail-value">Thank You email was send</span>
+                </div>
+            </div>
+            <div class="response-message">"Thank you, no."</div>
+        </div>
+        
+        <div class="response-card not-interested" data-category="not-interested" data-date="2026-05-11">
+            <div class="response-header">
+                <div>
+                    <div class="response-who">Bath Beach DS</div>
+                    <div class="response-email">info@bathbeachdrivingschool.com</div>
+                </div>
+                <div class="response-category not-interested">Not Interested</div>
+            </div>
+            <div class="response-date">
+                <span class="date-icon">📅</span> 11/05/2026
+            </div>
+            <div class="response-details">
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Subject:</span>
+                    <span class="response-detail-value">Still Relevant For Your Driving School?</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Campaign:</span>
+                    <span class="response-detail-value">Summer Leads Driving School - B1</span>
+                </div>
+                <div class="response-detail-item">
+                    <span class="response-detail-label">Action Taken:</span>
+                    <span class="response-detail-value">Thank You email was send</span>
+                </div>
+            </div>
+            <div class="response-message">"Hello Andrea,
+
+Thanks for following up on your emails, but I am not interested in your services.
+
+I have all the business I can handle right now.
+
+Regards,
+
+Barbara R. Desiderio
+President"</div>
+        </div>
+        
         <div class="response-card not-interested" data-category="not-interested" data-date="2026-05-04">
             <div class="response-header">
                 <div>
@@ -1965,7 +2030,7 @@ Pardon the brevity of this email; it was sent from my iPhone."</div>
             data: {
                 labels: ['Sold','Engaged – Interested','Existing Client','Follow-Up Needed','Hot Lead – Meeting Scheduled','Invalid / Wrong Contact','No Action Needed','Not Interested','Pipelined / Circle Back'],
                 datasets: [{
-                    data: [2,3,2,2,2,1,2,27,7],
+                    data: [2,3,2,2,2,1,2,29,7],
                     backgroundColor: [
                         '#fbbf24','#10b981','#ec4899','#d4a574','#3b82f6','#4b5563','#8b5cf6','#9ca3af','#06b6d4'
                     ],
